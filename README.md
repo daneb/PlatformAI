@@ -8,48 +8,7 @@ A reference implementation of an enterprise AI platform: common capabilities (RA
 
 ## Architecture
 
-```mermaid
-flowchart TB
-    subgraph clients["Consumers"]
-        C1[Team App A]
-        C2[Team App B]
-    end
-
-    subgraph hub["Control Plane  ·  Hub"]
-        GW[Gateway & Router]
-        AUTH[Identity & AuthZ\nKeycloak]
-        GATES[Encoded Gates\nPresidio · OPA/Rego]
-        REG[Capability & Model Registry]
-        OBS[Observability & Cost Metering\nOpenTelemetry · Grafana]
-    end
-
-    subgraph spokes["Capability Services  ·  Spokes"]
-        RAG[RAG]
-        OCR[OCR]
-        IDP[IDP Pipeline]
-        VIS[Vision]
-        ANOM[Anomaly Detection]
-    end
-
-    subgraph broker["Inference Broker  ·  LiteLLM"]
-        LOCAL[Local\nOllama · Tesseract · PyOD]
-        REMOTE[Remote\nDeepSeek V4]
-    end
-
-    subgraph substrate["Shared Substrate"]
-        OBJ[(MinIO\nObject Store)]
-        VEC[(pgvector\nVector Store)]
-        QUE[SQS/SNS\nLocalStack]
-        SEC[Secrets\nSOPS + age]
-    end
-
-    clients --> GW
-    GW --> AUTH --> GATES --> spokes
-    GATES -.egress gate.-> broker
-    spokes --> broker
-    spokes --> substrate
-    hub -.metrics.-> OBS
-```
+![Architecture](docs/images/architecture.svg)
 
 **Every request flows:** client → gateway → encoded gates → spoke → broker → local or remote inference → provenance-stamped response.
 
@@ -57,36 +16,7 @@ flowchart TB
 
 ## Logical Components
 
-```mermaid
-flowchart LR
-    subgraph req["Request Path"]
-        ENV["Uniform Envelope\ncapability · context · payload · options"]
-        JOBS["Async Job Model\nsubmit → 202 + job_id → poll"]
-    end
-
-    subgraph gate["Egress Gate  (fail-closed)"]
-        CLS[Classify payload]
-        PII[PII Redact\nPresidio]
-        POL{OPA Policy}
-        TOK[Tokenise & send]
-    end
-
-    subgraph backends["Inference Backends"]
-        B_LOC["Local  (free · private)\nembeddings · OCR · anomaly"]
-        B_REM["Remote  (paid · capable)\nDeepSeek V4 flash / pro"]
-    end
-
-    subgraph prov["Every Response"]
-        P["Provenance\nbackend · tokens · cost · latency · gates"]
-    end
-
-    ENV --> JOBS --> CLS --> PII --> POL
-    POL -- allow --> TOK --> B_REM
-    POL -- local_only --> B_LOC
-    POL -- deny --> DENY[❌ DENIED · audited]
-    B_LOC --> P
-    B_REM --> P
-```
+![Logical Components](docs/images/logical-components.svg)
 
 ---
 

@@ -37,85 +37,16 @@ Four containers, each with a single responsibility:
 
 ## Component Architecture
 
-```mermaid
-flowchart LR
-    subgraph client["Client (tests / curl)"]
-        C[HTTP client]
-    end
+![P0 Component Architecture](../../docs/images/p0-component-architecture.svg)
 
-    subgraph cp["Control Plane · :8000"]
-        GW[Gateway\nFastAPI]
-        JOBS[(Job Store\nin-memory)]
-    end
-
-    subgraph spoke["Spoke · :8001"]
-        SUM[capability-summarize\nFastAPI]
-    end
-
-    subgraph broker["Broker · :4000"]
-        LLM[LiteLLM\nOpenAI-compatible proxy]
-    end
-
-    subgraph mock["Mock Provider · :8002"]
-        STUB[stub-backend\nFixture server]
-        FIX[fixtures/stub-model.json]
-    end
-
-    C -->|"POST /capabilities\n{envelope}"| GW
-    GW <-->|read / write| JOBS
-    GW -->|"POST /execute\n{envelope}"| SUM
-    SUM -->|"POST /v1/chat/completions\n{model: stub-model}"| LLM
-    LLM -->|"POST /v1/chat/completions"| STUB
-    STUB --- FIX
-    STUB -->|canned completion| LLM
-    LLM -->|completion + usage| SUM
-    SUM -->|result + provenance + gates| GW
-    GW -->|"202 {job_id}"| C
-    C -->|"GET /jobs/{id}"| GW
-    GW -->|"200 {status, result, provenance, gates}"| C
-```
-
-**Startup dependency chain** (enforced by docker-compose `depends_on: condition: service_healthy`):
-
-```
-stub-backend healthy → litellm healthy → capability-summarize healthy → gateway starts
-```
+> Startup dependency chain enforced by docker-compose `depends_on: condition: service_healthy`:
+> `stub-backend healthy → litellm healthy → capability-summarize healthy → gateway starts`
 
 ---
 
 ## Request Lifecycle
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Client
-    participant Gateway as Gateway :8000
-    participant Jobs as Job Store
-    participant Spoke as capability-summarize :8001
-    participant Broker as LiteLLM :4000
-    participant Stub as stub-backend :8002
-
-    Client->>+Gateway: POST /capabilities {envelope}
-    Gateway->>Gateway: Validate envelope (Pydantic)
-    Gateway->>Jobs: create_job(job_id, status=queued)
-    Gateway-->>-Client: 202 {job_id, status: "queued"}
-
-    Note over Gateway: FastAPI BackgroundTask dispatches async
-
-    Gateway->>Jobs: update(status=running)
-    Gateway->>+Spoke: POST /execute {envelope}
-    Spoke->>+Broker: POST /v1/chat/completions {model: stub-model}
-    Broker->>+Stub: POST /v1/chat/completions
-    Stub-->>-Broker: fixture response {choices, usage}
-    Broker-->>-Spoke: completion {choices, usage}
-    Spoke->>Spoke: Build provenance + gate decision
-    Spoke-->>-Gateway: {result, provenance, gates}
-    Gateway->>Jobs: update(status=succeeded, result, provenance, gates)
-
-    Client->>+Gateway: GET /jobs/{job_id}
-    Gateway->>Jobs: get(job_id)
-    Gateway-->>-Client: 200 {status: "succeeded", result, provenance, gates}
-```
+![P0 Request Lifecycle](../../docs/images/p0-request-lifecycle.svg)
 
 **Key invariants:**
 - Steps 1–4 always complete in < 5 ms — the 202 is immediate regardless of model latency.
