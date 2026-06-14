@@ -1,0 +1,129 @@
+<svg viewBox="0 0 820 620" xmlns="http://www.w3.org/2000/svg" role="img" font-family="system-ui,sans-serif" font-size="12">
+  <title>P0 Request Lifecycle — Async Job Flow</title>
+  <desc>Numbered 15-step sequence: client submits POST /capabilities, receives 202 immediately, then a background task dispatches through the spoke to LiteLLM and the stub backend before the client polls GET /jobs to retrieve the completed result with full provenance.</desc>
+
+  <rect width="820" height="620" fill="#ffffff"/>
+  <text x="410" y="28" text-anchor="middle" font-size="15" font-weight="600" fill="#111111">P0 Request Lifecycle — Async Job Flow</text>
+
+  <defs>
+    <marker id="s-blue"   markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#4A90D9"/></marker>
+    <marker id="s-green"  markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#5BA85B"/></marker>
+    <marker id="s-orange" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#E8952A"/></marker>
+    <marker id="s-purple" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#8B5CF6"/></marker>
+    <marker id="s-gray"   markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#888888"/></marker>
+  </defs>
+
+  <!-- Participant headers — x centres: Client=80, Gateway=220, Jobs=350, Spoke=480, LiteLLM=600, Stub=735 -->
+  <rect x="30"  y="45" width="100" height="34" rx="6" fill="#f5f5f5"  stroke="#cccccc" stroke-width="1.2"/>
+  <text x="80"  y="67" text-anchor="middle" font-weight="600" fill="#111111">Client</text>
+
+  <rect x="163" y="45" width="114" height="34" rx="6" fill="#E8F0FB"  stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="220" y="61" text-anchor="middle" font-weight="600" fill="#1a3a6b">Gateway</text>
+  <text x="220" y="75" text-anchor="middle" font-size="10" fill="#1a3a6b">:8000</text>
+
+  <rect x="303" y="45" width="94"  height="34" rx="6" fill="#E8F0FB"  stroke="#4A90D9" stroke-width="1.2" stroke-dasharray="4 2"/>
+  <text x="350" y="61" text-anchor="middle" font-size="11" font-weight="600" fill="#1a3a6b">Job Store</text>
+  <text x="350" y="75" text-anchor="middle" font-size="10" fill="#1a3a6b">in-memory</text>
+
+  <rect x="423" y="45" width="114" height="34" rx="6" fill="#EEF7EE"  stroke="#5BA85B" stroke-width="1.2"/>
+  <text x="480" y="61" text-anchor="middle" font-weight="600" fill="#1a4d1a">Summarize</text>
+  <text x="480" y="75" text-anchor="middle" font-size="10" fill="#1a4d1a">spoke :8001</text>
+
+  <rect x="556" y="45" width="88"  height="34" rx="6" fill="#FEF4E4"  stroke="#E8952A" stroke-width="1.2"/>
+  <text x="600" y="61" text-anchor="middle" font-weight="600" fill="#7a4400">LiteLLM</text>
+  <text x="600" y="75" text-anchor="middle" font-size="10" fill="#7a4400">:4000</text>
+
+  <rect x="680" y="45" width="110" height="34" rx="6" fill="#F5F0FB"  stroke="#8B5CF6" stroke-width="1.2"/>
+  <text x="735" y="61" text-anchor="middle" font-weight="600" fill="#3b1a7a">stub-backend</text>
+  <text x="735" y="75" text-anchor="middle" font-size="10" fill="#3b1a7a">:8002</text>
+
+  <!-- Lifelines -->
+  <line x1="80"  y1="79" x2="80"  y2="610" stroke="#dddddd" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="220" y1="79" x2="220" y2="610" stroke="#4A90D9" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
+  <line x1="350" y1="79" x2="350" y2="610" stroke="#4A90D9" stroke-width="1" stroke-dasharray="4 3" opacity="0.25"/>
+  <line x1="480" y1="79" x2="480" y2="610" stroke="#5BA85B" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
+  <line x1="600" y1="79" x2="600" y2="610" stroke="#E8952A" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
+  <line x1="735" y1="79" x2="735" y2="610" stroke="#8B5CF6" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
+
+  <!-- Step badges -->
+  <!-- 1 -->
+  <circle cx="22" cy="115" r="9" fill="#4A90D9"/><text x="22" y="119" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="700">1</text>
+  <line x1="80" y1="115" x2="213" y2="115" stroke="#4A90D9" stroke-width="1.8" marker-end="url(#s-blue)"/>
+  <text x="147" y="110" text-anchor="middle" font-size="10" fill="#4A90D9" font-weight="500">POST /capabilities  {envelope}</text>
+
+  <!-- 2 -->
+  <circle cx="22" cy="143" r="9" fill="#4A90D9"/><text x="22" y="147" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="700">2</text>
+  <path d="M220,143 Q252,143 252,153 Q252,163 220,163" stroke="#4A90D9" stroke-width="1.4" fill="none" stroke-dasharray="3 2"/>
+  <text x="268" y="157" font-size="10" fill="#4A90D9">validate envelope (Pydantic)</text>
+
+  <!-- 3 -->
+  <circle cx="22" cy="183" r="9" fill="#4A90D9"/><text x="22" y="187" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="700">3</text>
+  <line x1="220" y1="183" x2="343" y2="183" stroke="#4A90D9" stroke-width="1.5" marker-end="url(#s-blue)"/>
+  <text x="282" y="177" text-anchor="middle" font-size="10" fill="#4A90D9">create_job(queued)</text>
+
+  <!-- 4 -->
+  <circle cx="22" cy="210" r="9" fill="#4A90D9"/><text x="22" y="214" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="700">4</text>
+  <line x1="220" y1="210" x2="87" y2="210" stroke="#888888" stroke-width="1.5" stroke-dasharray="5 2" marker-end="url(#s-gray)"/>
+  <text x="147" y="205" text-anchor="middle" font-size="10" fill="#777777">202  {job_id,  status: "queued"}</text>
+
+  <!-- Async boundary -->
+  <rect x="30" y="223" width="760" height="22" rx="4" fill="#FFF8E6" stroke="#E8952A" stroke-width="1" stroke-dasharray="5 3" opacity="0.8"/>
+  <text x="410" y="238" text-anchor="middle" font-size="10" fill="#7a4400" font-style="italic">— async boundary: 202 returned · FastAPI BackgroundTask dispatches below —</text>
+
+  <!-- 5 -->
+  <circle cx="22" cy="263" r="9" fill="#E8952A"/><text x="22" y="267" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="700">5</text>
+  <line x1="220" y1="263" x2="343" y2="263" stroke="#E8952A" stroke-width="1.5" marker-end="url(#s-orange)"/>
+  <text x="282" y="257" text-anchor="middle" font-size="10" fill="#E8952A">update(status=running)</text>
+
+  <!-- 6 -->
+  <circle cx="22" cy="293" r="9" fill="#5BA85B"/><text x="22" y="297" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="700">6</text>
+  <line x1="220" y1="293" x2="473" y2="293" stroke="#5BA85B" stroke-width="1.8" marker-end="url(#s-green)"/>
+  <text x="347" y="287" text-anchor="middle" font-size="10" fill="#5BA85B" font-weight="500">POST /execute  {envelope}</text>
+
+  <!-- 7 -->
+  <circle cx="22" cy="323" r="9" fill="#E8952A"/><text x="22" y="327" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="700">7</text>
+  <line x1="480" y1="323" x2="593" y2="323" stroke="#E8952A" stroke-width="1.5" marker-end="url(#s-orange)"/>
+  <text x="537" y="315" text-anchor="middle" font-size="10" fill="#E8952A">POST /v1/chat/completions</text>
+  <text x="537" y="330" text-anchor="middle" font-size="10" fill="#E8952A">{model: stub-model}</text>
+
+  <!-- 8 -->
+  <circle cx="22" cy="362" r="9" fill="#8B5CF6"/><text x="22" y="366" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="700">8</text>
+  <line x1="600" y1="362" x2="728" y2="362" stroke="#8B5CF6" stroke-width="1.5" marker-end="url(#s-purple)"/>
+  <text x="665" y="354" text-anchor="middle" font-size="10" fill="#8B5CF6">routes stub-model →</text>
+  <text x="665" y="369" text-anchor="middle" font-size="10" fill="#8B5CF6">POST /v1/chat/completions</text>
+
+  <!-- 9 -->
+  <circle cx="22" cy="400" r="9" fill="#8B5CF6"/><text x="22" y="404" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="700">9</text>
+  <line x1="735" y1="400" x2="607" y2="400" stroke="#888888" stroke-width="1.5" stroke-dasharray="5 2" marker-end="url(#s-gray)"/>
+  <text x="665" y="394" text-anchor="middle" font-size="9" fill="#777777">fixture response  {choices, usage}</text>
+
+  <!-- 10 -->
+  <circle cx="22" cy="428" r="9" fill="#E8952A"/><text x="22" y="432" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="700">10</text>
+  <line x1="600" y1="428" x2="487" y2="428" stroke="#888888" stroke-width="1.5" stroke-dasharray="5 2" marker-end="url(#s-gray)"/>
+  <text x="537" y="422" text-anchor="middle" font-size="9" fill="#777777">completion + usage</text>
+
+  <!-- 11 -->
+  <circle cx="22" cy="458" r="9" fill="#5BA85B"/><text x="22" y="462" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="700">11</text>
+  <path d="M480,458 Q514,458 514,468 Q514,478 480,478" stroke="#5BA85B" stroke-width="1.4" fill="none" stroke-dasharray="3 2"/>
+  <text x="530" y="472" font-size="10" fill="#5BA85B">build provenance + gate decision</text>
+
+  <!-- 12 -->
+  <circle cx="22" cy="498" r="9" fill="#5BA85B"/><text x="22" y="502" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="700">12</text>
+  <line x1="480" y1="498" x2="227" y2="498" stroke="#888888" stroke-width="1.5" stroke-dasharray="5 2" marker-end="url(#s-gray)"/>
+  <text x="347" y="492" text-anchor="middle" font-size="9" fill="#777777">{result,  provenance,  gates}</text>
+
+  <!-- 13 -->
+  <circle cx="22" cy="526" r="9" fill="#4A90D9"/><text x="22" y="530" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="700">13</text>
+  <line x1="220" y1="526" x2="343" y2="526" stroke="#4A90D9" stroke-width="1.5" marker-end="url(#s-blue)"/>
+  <text x="282" y="520" text-anchor="middle" font-size="10" fill="#4A90D9">update(succeeded + result)</text>
+
+  <!-- 14 -->
+  <circle cx="22" cy="556" r="9" fill="#4A90D9"/><text x="22" y="560" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="700">14</text>
+  <line x1="80" y1="556" x2="213" y2="556" stroke="#4A90D9" stroke-width="1.8" marker-end="url(#s-blue)"/>
+  <text x="147" y="550" text-anchor="middle" font-size="10" fill="#4A90D9" font-weight="500">GET /jobs/{job_id}</text>
+
+  <!-- 15 -->
+  <circle cx="22" cy="586" r="9" fill="#5BA85B"/><text x="22" y="590" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="700">15</text>
+  <line x1="220" y1="586" x2="87" y2="586" stroke="#888888" stroke-width="1.5" stroke-dasharray="5 2" marker-end="url(#s-gray)"/>
+  <text x="147" y="580" text-anchor="middle" font-size="9" fill="#777777">200  {status: "succeeded",  result,  provenance,  gates}</text>
+</svg>

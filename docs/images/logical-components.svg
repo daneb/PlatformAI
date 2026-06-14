@@ -1,0 +1,132 @@
+<svg viewBox="0 0 860 400" xmlns="http://www.w3.org/2000/svg" role="img" font-family="system-ui,sans-serif" font-size="12">
+  <title>AI Platform — Logical Components &amp; Egress Gate</title>
+  <desc>Request path flowing through the uniform envelope and async job model into the fail-closed egress gate, branching to local inference, remote inference, or denial, with provenance stamped on every allowed response.</desc>
+
+  <rect width="860" height="400" fill="#ffffff"/>
+
+  <!-- ── Title ── -->
+  <text x="430" y="26" text-anchor="middle" font-size="14" font-weight="600" fill="#111111">Logical Components &amp; Egress Gate</text>
+
+  <!-- ══════════════════════════════════════════════
+       ROW 1 — REQUEST PATH
+  ══════════════════════════════════════════════ -->
+  <text x="20" y="55" font-size="10" font-weight="600" fill="#888888" letter-spacing="1">REQUEST PATH</text>
+
+  <!-- Uniform Envelope -->
+  <rect x="20" y="62" width="175" height="52" rx="7" fill="#EBF2FC" stroke="#4A90D9" stroke-width="1.4"/>
+  <text x="107" y="84" text-anchor="middle" font-weight="600" font-size="11" fill="#1a3a6b">Uniform Envelope</text>
+  <text x="107" y="100" text-anchor="middle" font-size="10" fill="#4A90D9">capability · context · payload</text>
+
+  <!-- Arrow -->
+  <line x1="195" y1="88" x2="225" y2="88" stroke="#4A90D9" stroke-width="1.6" marker-end="url(#ah1)"/>
+
+  <!-- Async Job Model -->
+  <rect x="225" y="62" width="175" height="52" rx="7" fill="#EBF2FC" stroke="#4A90D9" stroke-width="1.4"/>
+  <text x="312" y="84" text-anchor="middle" font-weight="600" font-size="11" fill="#1a3a6b">Async Job Model</text>
+  <text x="312" y="100" text-anchor="middle" font-size="10" fill="#4A90D9">POST → 202 + job_id → poll</text>
+
+  <!-- Arrow into gate -->
+  <line x1="400" y1="88" x2="430" y2="88" stroke="#E8952A" stroke-width="1.6" marker-end="url(#ah2)"/>
+
+  <!-- ══════════════════════════════════════════════
+       EGRESS GATE BAND
+  ══════════════════════════════════════════════ -->
+  <rect x="430" y="44" width="410" height="86" rx="8" fill="#FEF4E4" stroke="#E8952A" stroke-width="1.5"/>
+  <text x="450" y="62" font-size="10" font-weight="600" fill="#7a4400" letter-spacing="1">EGRESS GATE  ·  FAIL-CLOSED</text>
+
+  <!-- Classify -->
+  <rect x="445" y="68" width="90" height="48" rx="5" fill="#ffffff" stroke="#E8952A" stroke-width="1"/>
+  <text x="490" y="88" text-anchor="middle" font-weight="600" font-size="11" fill="#7a4400">Classify</text>
+  <text x="490" y="103" text-anchor="middle" font-size="10" fill="#E8952A">rules + model</text>
+
+  <line x1="535" y1="92" x2="556" y2="92" stroke="#E8952A" stroke-width="1.4" marker-end="url(#ah2)"/>
+
+  <!-- PII Redact -->
+  <rect x="557" y="68" width="100" height="48" rx="5" fill="#ffffff" stroke="#E8952A" stroke-width="1"/>
+  <text x="607" y="88" text-anchor="middle" font-weight="600" font-size="11" fill="#7a4400">PII Redact</text>
+  <text x="607" y="103" text-anchor="middle" font-size="10" fill="#E8952A">Presidio</text>
+
+  <line x1="657" y1="92" x2="678" y2="92" stroke="#E8952A" stroke-width="1.4" marker-end="url(#ah2)"/>
+
+  <!-- OPA Policy diamond -->
+  <polygon points="720,68 760,92 720,116 680,92" fill="#ffffff" stroke="#E8952A" stroke-width="1.4"/>
+  <text x="720" y="88" text-anchor="middle" font-weight="600" font-size="11" fill="#7a4400">OPA</text>
+  <text x="720" y="103" text-anchor="middle" font-size="10" fill="#E8952A">Policy</text>
+
+  <!-- ══════════════════════════════════════════════
+       OUTCOMES — three branches from the diamond
+  ══════════════════════════════════════════════ -->
+
+  <!-- Branch: DENY (left-down from diamond) -->
+  <line x1="680" y1="92" x2="560" y2="175" stroke="#cc3333" stroke-width="1.4" marker-end="url(#ah-red)"/>
+  <text x="600" y="135" text-anchor="middle" font-size="10" fill="#cc3333" font-style="italic">deny</text>
+  <rect x="480" y="175" width="160" height="46" rx="6" fill="#FDECEC" stroke="#cc3333" stroke-width="1.3"/>
+  <text x="560" y="196" text-anchor="middle" font-weight="600" font-size="12" fill="#8b0000">✕  DENIED</text>
+  <text x="560" y="212" text-anchor="middle" font-size="10" fill="#cc3333">audited · fail-closed</text>
+
+  <!-- Branch: LOCAL (right from diamond, down) -->
+  <line x1="760" y1="92" x2="800" y2="92" stroke="#5BA85B" stroke-width="1.4"/>
+  <line x1="800" y1="92" x2="800" y2="175" stroke="#5BA85B" stroke-width="1.4" marker-end="url(#ah-green)"/>
+  <text x="818" y="135" font-size="10" fill="#5BA85B" font-style="italic">local_only</text>
+  <rect x="680" y="175" width="160" height="46" rx="6" fill="#EEF7EE" stroke="#5BA85B" stroke-width="1.3"/>
+  <text x="760" y="196" text-anchor="middle" font-weight="600" font-size="11" fill="#1a4d1a">Local Backend</text>
+  <text x="760" y="212" text-anchor="middle" font-size="10" fill="#5BA85B">embeddings · OCR · anomaly</text>
+
+  <!-- Branch: REMOTE (straight down from diamond) -->
+  <line x1="720" y1="116" x2="720" y2="175" stroke="#4A90D9" stroke-width="1.4" marker-end="url(#ah1)"/>
+  <text x="728" y="153" font-size="10" fill="#4A90D9" font-style="italic">allow</text>
+
+  <!-- Tokenise box -->
+  <rect x="645" y="175" width="0" height="0"/><!-- spacer -->
+
+  <!-- Remote Backend -->
+  <rect x="620" y="175" width="160" height="46" rx="6" fill="#EBF2FC" stroke="#4A90D9" stroke-width="1.3"/>
+  <text x="700" y="196" text-anchor="middle" font-weight="600" font-size="11" fill="#1a3a6b">Remote Backend</text>
+  <text x="700" y="212" text-anchor="middle" font-size="10" fill="#4A90D9">DeepSeek V4 flash / pro</text>
+
+  <!-- ══════════════════════════════════════════════
+       PROVENANCE — converge local + remote
+  ══════════════════════════════════════════════ -->
+  <!-- Arrow from Remote down -->
+  <line x1="700" y1="221" x2="700" y2="272" stroke="#4A90D9" stroke-width="1.4" marker-end="url(#ah1)"/>
+  <!-- Arrow from Local down-left to provenance -->
+  <line x1="760" y1="221" x2="760" y2="248" stroke="#5BA85B" stroke-width="1.4"/>
+  <line x1="760" y1="248" x2="720" y2="272" stroke="#5BA85B" stroke-width="1.4" marker-end="url(#ah-green)"/>
+
+  <!-- Provenance box -->
+  <rect x="580" y="272" width="260" height="56" rx="7" fill="#F5F0FB" stroke="#8B5CF6" stroke-width="1.5"/>
+  <text x="710" y="294" text-anchor="middle" font-weight="600" font-size="11" fill="#3b1a7a">Provenance  (on every response)</text>
+  <text x="710" y="311" text-anchor="middle" font-size="10" fill="#8B5CF6">backend · tokens · cost_usd · latency_ms · gates</text>
+
+  <!-- ══════════════════════════════════════════════
+       KEY  (bottom-left)
+  ══════════════════════════════════════════════ -->
+  <rect x="20" y="175" width="440" height="153" rx="7" fill="#f7f7f7" stroke="#dddddd" stroke-width="1"/>
+  <text x="36" y="196" font-size="10" font-weight="600" fill="#888888" letter-spacing="1">DATA CLASSIFICATION → ROUTING RULE</text>
+
+  <rect x="36" y="205" width="10" height="10" rx="2" fill="#cc3333"/>
+  <text x="52" y="215" font-size="11" fill="#111111"><tspan font-weight="600">confidential / restricted</tspan> → local_only; deny if unavailable</text>
+
+  <rect x="36" y="224" width="10" height="10" rx="2" fill="#E8952A"/>
+  <text x="52" y="234" font-size="11" fill="#111111"><tspan font-weight="600">residency: on_prem_only</tspan> → local_only; deny if unavailable</text>
+
+  <rect x="36" y="243" width="10" height="10" rx="2" fill="#5BA85B"/>
+  <text x="52" y="253" font-size="11" fill="#111111"><tspan font-weight="600">task: embedding / ocr_raw_text</tspan> → local (free · private)</text>
+
+  <rect x="36" y="262" width="10" height="10" rx="2" fill="#4A90D9"/>
+  <text x="52" y="272" font-size="11" fill="#111111"><tspan font-weight="600">task: heavy_reasoning</tspan> → remote deepseek-v4-pro</text>
+
+  <rect x="36" y="281" width="10" height="10" rx="2" fill="#4A90D9" opacity="0.5"/>
+  <text x="52" y="291" font-size="11" fill="#111111"><tspan font-weight="600">default</tspan> → remote deepseek-v4-flash</text>
+
+  <line x1="36" y1="305" x2="444" y2="305" stroke="#dddddd" stroke-width="1"/>
+  <text x="36" y="320" font-size="10" fill="#888888" font-style="italic">Fail-closed: uncertain classification → deny.  Restricted data never egresses, even after redaction.</text>
+
+  <!-- DEFS -->
+  <defs>
+    <marker id="ah1"      markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#4A90D9"/></marker>
+    <marker id="ah2"      markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#E8952A"/></marker>
+    <marker id="ah-green" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#5BA85B"/></marker>
+    <marker id="ah-red"   markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#cc3333"/></marker>
+  </defs>
+</svg>
