@@ -1,0 +1,9 @@
+model_list:
+  - model_name: stub-model
+    litellm_params:
+      model: openai/stub-gpt
+      api_base: http://stub-backend:8002/v1
+      api_key: stub-key
+
+general_settings:
+  master_key: sk-platform-dev

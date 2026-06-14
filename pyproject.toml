@@ -1,0 +1,8 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: requires docker-compose stack (deselect with -m 'not integration')",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]

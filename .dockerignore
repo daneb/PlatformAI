@@ -1,0 +1,11 @@
+.git
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.ruff_cache
+tests/
+*.md
+pyproject.toml
+requirements-dev.txt
+AI-Platform-SPEC.md

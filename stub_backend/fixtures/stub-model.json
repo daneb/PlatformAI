@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-stub-fixture-001",
+  "object": "chat.completion",
+  "created": 1718000000,
+  "model": "stub-model",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "This is a recorded stub response representing a model summary. It is replayed in tests so no real API is called."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 55,
+    "completion_tokens": 23,
+    "total_tokens": 78
+  }
+}
