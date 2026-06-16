@@ -14,6 +14,7 @@ app = FastAPI(title="AI Platform Gateway")
 # Spoke registry — extended each phase. Only capabilities listed here are routable.
 _ROUTES: dict[str, str] = {
     "summarize": "http://capability-summarize:8001",
+    "rag": "http://capability-rag:8003",
 }
 
 

@@ -1,0 +1,161 @@
+<svg viewBox="0 0 820 568" xmlns="http://www.w3.org/2000/svg" role="img" font-family="system-ui,sans-serif" font-size="13">
+  <title>P1 RAG Capability — Service Architecture</title>
+  <desc>Six docker-compose services: gateway control plane, capability-summarize and capability-rag spokes, LiteLLM broker, stub-backend, and postgres+pgvector substrate; with request/response arrows and startup dependency chain.</desc>
+
+  <rect width="820" height="568" fill="#ffffff"/>
+  <text x="410" y="28" text-anchor="middle" font-size="15" font-weight="600" fill="#111111">P1 RAG Capability — Service Architecture</text>
+
+  <defs>
+    <marker id="ab" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4A90D9"/></marker>
+    <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#5BA85B"/></marker>
+    <marker id="at" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#2E9E63"/></marker>
+    <marker id="ao" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#E8952A"/></marker>
+    <marker id="ap" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#8B5CF6"/></marker>
+    <marker id="as" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#5B7FA8"/></marker>
+    <marker id="ax" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#888888"/></marker>
+  </defs>
+
+  <!-- ── Client ── -->
+  <rect x="15" y="218" width="95" height="65" rx="8" fill="#f5f5f5" stroke="#cccccc" stroke-width="1.5"/>
+  <text x="62" y="238" text-anchor="middle" font-weight="600" fill="#111111">Client</text>
+  <text x="62" y="256" text-anchor="middle" font-size="11" fill="#666666">curl / pytest</text>
+
+  <!-- ── Gateway ── -->
+  <rect x="163" y="118" width="135" height="200" rx="8" fill="#E8F0FB" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="230" y="140" text-anchor="middle" font-weight="600" fill="#1a3a6b">Gateway</text>
+  <text x="230" y="157" text-anchor="middle" font-size="11" fill="#1a3a6b">:8000</text>
+  <rect x="183" y="176" width="95" height="48" rx="5" fill="#ffffff" stroke="#4A90D9" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="230" y="196" text-anchor="middle" font-size="11" fill="#1a3a6b" font-weight="500">Job Store</text>
+  <text x="230" y="211" text-anchor="middle" font-size="10" fill="#4A90D9">in-memory</text>
+  <text x="230" y="298" text-anchor="middle" font-size="10" fill="#1a3a6b">Envelope · Routing · Jobs</text>
+
+  <!-- ── Summarize spoke ── -->
+  <rect x="358" y="118" width="138" height="80" rx="8" fill="#EEF7EE" stroke="#5BA85B" stroke-width="1.5"/>
+  <text x="427" y="140" text-anchor="middle" font-weight="600" fill="#1a4d1a">Summarize</text>
+  <text x="427" y="157" text-anchor="middle" font-size="11" fill="#1a4d1a">:8001</text>
+  <text x="427" y="174" text-anchor="middle" font-size="10" fill="#1a4d1a">spoke · FastAPI</text>
+  <text x="427" y="188" text-anchor="middle" font-size="10" fill="#1a4d1a">provenance + gates</text>
+
+  <!-- ── RAG spoke ── -->
+  <rect x="358" y="228" width="138" height="100" rx="8" fill="#E4F5EC" stroke="#2E9E63" stroke-width="1.5"/>
+  <text x="427" y="250" text-anchor="middle" font-weight="600" fill="#0d4025">RAG</text>
+  <text x="427" y="267" text-anchor="middle" font-size="11" fill="#0d4025">:8003</text>
+  <text x="427" y="284" text-anchor="middle" font-size="10" fill="#0d4025">ingest | query</text>
+  <text x="427" y="299" text-anchor="middle" font-size="10" fill="#0d4025">asyncpg · pgvector</text>
+  <text x="427" y="314" text-anchor="middle" font-size="10" fill="#0d4025">provenance + gates</text>
+
+  <!-- ── LiteLLM ── -->
+  <rect x="553" y="130" width="118" height="128" rx="8" fill="#FEF4E4" stroke="#E8952A" stroke-width="1.5"/>
+  <text x="612" y="152" text-anchor="middle" font-weight="600" fill="#7a4400">LiteLLM</text>
+  <text x="612" y="169" text-anchor="middle" font-size="11" fill="#7a4400">:4000</text>
+  <text x="612" y="192" text-anchor="middle" font-size="10" fill="#7a4400">embed-model</text>
+  <text x="612" y="208" text-anchor="middle" font-size="10" fill="#7a4400">deepseek-v4-flash</text>
+  <text x="612" y="224" text-anchor="middle" font-size="10" fill="#7a4400">deepseek-v4-pro</text>
+
+  <!-- ── stub-backend ── -->
+  <rect x="706" y="118" width="108" height="80" rx="8" fill="#F5F0FB" stroke="#8B5CF6" stroke-width="1.5"/>
+  <text x="760" y="140" text-anchor="middle" font-weight="600" fill="#3b1a7a">stub-backend</text>
+  <text x="760" y="157" text-anchor="middle" font-size="11" fill="#3b1a7a">:8002</text>
+  <text x="760" y="174" text-anchor="middle" font-size="10" fill="#3b1a7a">/v1/embeddings</text>
+  <text x="760" y="189" text-anchor="middle" font-size="10" fill="#3b1a7a">/v1/chat/completions</text>
+
+  <!-- ── postgres ── -->
+  <rect x="553" y="322" width="118" height="90" rx="8" fill="#EEF2F5" stroke="#5B7FA8" stroke-width="1.5"/>
+  <text x="612" y="344" text-anchor="middle" font-weight="600" fill="#1a3050">postgres</text>
+  <text x="612" y="361" text-anchor="middle" font-size="11" fill="#1a3050">:5432</text>
+  <text x="612" y="381" text-anchor="middle" font-size="10" fill="#1a3050">rag_chunks</text>
+  <text x="612" y="396" text-anchor="middle" font-size="10" fill="#1a3050">VECTOR(768) · HNSW</text>
+
+  <!-- ── Arrows ── -->
+
+  <!-- Client → Gateway: POST /capabilities -->
+  <line x1="110" y1="240" x2="163" y2="240" stroke="#4A90D9" stroke-width="1.5" marker-end="url(#ab)"/>
+  <text x="136" y="232" text-anchor="middle" font-size="10" fill="#4A90D9">POST</text>
+  <text x="136" y="245" text-anchor="middle" font-size="10" fill="#4A90D9">/capabilities</text>
+
+  <!-- Gateway → Client: 202 (dashed) -->
+  <line x1="163" y1="258" x2="110" y2="258" stroke="#888888" stroke-width="1.5" stroke-dasharray="5 2" marker-end="url(#ax)"/>
+  <text x="136" y="272" text-anchor="middle" font-size="10" fill="#888888">202 + job_id</text>
+
+  <!-- Client → Gateway: GET /jobs (curved path below) -->
+  <path d="M62,283 Q62,358 163,350 L163,318" stroke="#4A90D9" stroke-width="1.5" fill="none" stroke-dasharray="5 3" marker-end="url(#ab)"/>
+  <text x="88" y="349" text-anchor="middle" font-size="10" fill="#4A90D9">GET /jobs/{id}</text>
+
+  <!-- Gateway → Summarize: POST /execute -->
+  <line x1="298" y1="156" x2="358" y2="156" stroke="#5BA85B" stroke-width="1.5" marker-end="url(#ag)"/>
+  <text x="328" y="149" text-anchor="middle" font-size="10" fill="#5BA85B">POST /execute</text>
+
+  <!-- Summarize → Gateway: result (dashed) -->
+  <line x1="358" y1="173" x2="298" y2="173" stroke="#888888" stroke-width="1.5" stroke-dasharray="5 2" marker-end="url(#ax)"/>
+  <text x="328" y="186" text-anchor="middle" font-size="9" fill="#777777">result · prov · gates</text>
+
+  <!-- Gateway → RAG: POST /execute -->
+  <line x1="298" y1="272" x2="358" y2="272" stroke="#2E9E63" stroke-width="1.8" marker-end="url(#at)"/>
+  <text x="328" y="265" text-anchor="middle" font-size="10" fill="#2E9E63">POST /execute</text>
+
+  <!-- RAG → Gateway: result (dashed) -->
+  <line x1="358" y1="290" x2="298" y2="290" stroke="#888888" stroke-width="1.5" stroke-dasharray="5 2" marker-end="url(#ax)"/>
+  <text x="328" y="304" text-anchor="middle" font-size="9" fill="#777777">result · prov · gates</text>
+
+  <!-- Summarize → LiteLLM -->
+  <line x1="496" y1="153" x2="553" y2="168" stroke="#E8952A" stroke-width="1.5" marker-end="url(#ao)"/>
+  <text x="523" y="151" text-anchor="middle" font-size="10" fill="#E8952A">stub-model</text>
+
+  <!-- RAG → LiteLLM: embed + generate -->
+  <line x1="496" y1="258" x2="553" y2="214" stroke="#2E9E63" stroke-width="1.5" marker-end="url(#ao)"/>
+  <text x="521" y="231" text-anchor="middle" font-size="9" fill="#2E9E63">embed-model ·</text>
+  <text x="521" y="244" text-anchor="middle" font-size="9" fill="#2E9E63">deepseek-v4-flash</text>
+
+  <!-- LiteLLM → Stub: routes to -->
+  <line x1="671" y1="157" x2="706" y2="153" stroke="#8B5CF6" stroke-width="1.5" marker-end="url(#ap)"/>
+  <text x="689" y="149" text-anchor="middle" font-size="10" fill="#8B5CF6">routes to</text>
+
+  <!-- Stub → LiteLLM: canned response (dashed) -->
+  <line x1="706" y1="172" x2="671" y2="175" stroke="#888888" stroke-width="1.5" stroke-dasharray="5 2" marker-end="url(#ax)"/>
+  <text x="688" y="188" text-anchor="middle" font-size="9" fill="#777777">canned response</text>
+
+  <!-- RAG → Postgres: INSERT chunks -->
+  <line x1="496" y1="307" x2="553" y2="335" stroke="#5B7FA8" stroke-width="1.5" marker-end="url(#as)"/>
+  <text x="521" y="313" text-anchor="middle" font-size="10" fill="#5B7FA8">INSERT chunks</text>
+
+  <!-- Postgres → RAG: ANN SELECT (dashed) -->
+  <line x1="553" y1="353" x2="496" y2="322" stroke="#888888" stroke-width="1.5" stroke-dasharray="5 2" marker-end="url(#ax)"/>
+  <text x="520" y="348" text-anchor="middle" font-size="9" fill="#777777">ANN SELECT</text>
+
+  <!-- ── Startup dependency chain ── -->
+  <rect x="20" y="430" width="780" height="118" rx="8" fill="#f7f7f7" stroke="#dddddd" stroke-width="1"/>
+  <text x="40" y="450" font-weight="600" font-size="12" fill="#111111">Startup dependency chain (docker-compose healthchecks)</text>
+
+  <!-- Row 1: stub-backend → litellm → cap-summarize → gateway -->
+  <rect x="38"  y="462" width="112" height="26" rx="5" fill="#F5F0FB" stroke="#8B5CF6" stroke-width="1.2"/>
+  <text x="94"  y="480" text-anchor="middle" font-size="11" fill="#3b1a7a">stub-backend</text>
+  <line x1="150" y1="475" x2="184" y2="475" stroke="#aaaaaa" stroke-width="1.3" marker-end="url(#ax)"/>
+  <rect x="184" y="462" width="78"  height="26" rx="5" fill="#FEF4E4" stroke="#E8952A" stroke-width="1.2"/>
+  <text x="223" y="480" text-anchor="middle" font-size="11" fill="#7a4400">litellm</text>
+  <line x1="262" y1="475" x2="296" y2="475" stroke="#aaaaaa" stroke-width="1.3" marker-end="url(#ax)"/>
+  <rect x="296" y="462" width="152" height="26" rx="5" fill="#EEF7EE" stroke="#5BA85B" stroke-width="1.2"/>
+  <text x="372" y="480" text-anchor="middle" font-size="11" fill="#1a4d1a">capability-summarize</text>
+  <line x1="448" y1="475" x2="608" y2="483" stroke="#aaaaaa" stroke-width="1.3" marker-end="url(#ax)"/>
+
+  <!-- Row 2: postgres → cap-rag → gateway -->
+  <rect x="38"  y="498" width="80"  height="26" rx="5" fill="#EEF2F5" stroke="#5B7FA8" stroke-width="1.2"/>
+  <text x="78"  y="516" text-anchor="middle" font-size="11" fill="#1a3050">postgres</text>
+  <line x1="118" y1="511" x2="184" y2="511" stroke="#aaaaaa" stroke-width="1.3" marker-end="url(#ax)"/>
+  <rect x="184" y="498" width="114" height="26" rx="5" fill="#E4F5EC" stroke="#2E9E63" stroke-width="1.2"/>
+  <text x="241" y="516" text-anchor="middle" font-size="11" fill="#0d4025">capability-rag</text>
+  <line x1="298" y1="511" x2="608" y2="497" stroke="#aaaaaa" stroke-width="1.3" marker-end="url(#ax)"/>
+
+  <!-- litellm → cap-rag (vertical dotted dependency) -->
+  <line x1="223" y1="488" x2="223" y2="498" stroke="#aaaaaa" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#ax)"/>
+
+  <!-- Gateway box (shared target for both rows) -->
+  <rect x="608" y="460" width="100" height="62" rx="5" fill="#E8F0FB" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="658" y="486" text-anchor="middle" font-size="11" fill="#1a3a6b">gateway</text>
+  <text x="658" y="502" text-anchor="middle" font-size="10" fill="#4A90D9">starts last</text>
+
+  <text x="40"  y="541" font-size="11" fill="#555555">Verify: </text>
+  <text x="82"  y="541" font-size="11" fill="#555555" font-family="monospace">docker compose ps</text>
+  <text x="215" y="541" font-size="11" fill="#555555"> — all six containers must show </text>
+  <text x="437" y="541" font-size="11" fill="#5BA85B" font-weight="600">(healthy)</text>
+  <text x="487" y="541" font-size="11" fill="#555555"> before running tests</text>
+</svg>

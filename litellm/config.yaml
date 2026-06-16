@@ -1,7 +1,30 @@
 model_list:
+  # ── test/stub models ──────────────────────────────────────────────────────
   - model_name: stub-model
     litellm_params:
       model: openai/stub-gpt
+      api_base: http://stub-backend:8002/v1
+      api_key: stub-key
+
+  # Production: swap api_base to Ollama (http://ollama:11434) and
+  # model to ollama/nomic-embed-text
+  - model_name: embed-model
+    litellm_params:
+      model: openai/embed
+      api_base: http://stub-backend:8002/v1
+      api_key: stub-key
+
+  # Production: swap api_base to https://api.deepseek.com and
+  # model to deepseek/deepseek-v4-flash with a real API key
+  - model_name: deepseek-v4-flash
+    litellm_params:
+      model: openai/deepseek-v4-flash
+      api_base: http://stub-backend:8002/v1
+      api_key: stub-key
+
+  - model_name: deepseek-v4-pro
+    litellm_params:
+      model: openai/deepseek-v4-pro
       api_base: http://stub-backend:8002/v1
       api_key: stub-key
 

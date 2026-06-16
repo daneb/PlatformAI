@@ -1,0 +1,172 @@
+<svg viewBox="0 0 820 640" xmlns="http://www.w3.org/2000/svg" role="img" font-family="system-ui,sans-serif" font-size="12">
+  <title>P1 RAG — Query Flow</title>
+  <desc>18-step sequence: client submits query → 202 → embed question → ANN SELECT top-k chunks → generate via deepseek-v4-flash → return answer + sources + provenance.</desc>
+
+  <rect width="820" height="640" fill="#ffffff"/>
+  <text x="410" y="24" text-anchor="middle" font-size="15" font-weight="600" fill="#111111">P1 RAG — Query Flow</text>
+  <text x="410" y="41" text-anchor="middle" font-size="11" fill="#666666">POST /capabilities {operation:"query"} → 202 → embed → ANN retrieve → generate → poll result</text>
+
+  <defs>
+    <marker id="mc" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#4A90D9"/></marker>
+    <marker id="mr" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#2E9E63"/></marker>
+    <marker id="ml" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#E8952A"/></marker>
+    <marker id="ms" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#8B5CF6"/></marker>
+    <marker id="mp" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#5B7FA8"/></marker>
+    <marker id="mg" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#888888"/></marker>
+  </defs>
+
+  <!-- ── Participant boxes  y=52..88 ── -->
+  <rect x="16"  y="52" width="96"  height="36" rx="6" fill="#f5f5f5" stroke="#cccccc" stroke-width="1.4"/>
+  <text x="64"  y="70"  text-anchor="middle" font-weight="600" fill="#333333">Client</text>
+  <text x="64"  y="84"  text-anchor="middle" font-size="10" fill="#777777">curl / pytest</text>
+
+  <rect x="143" y="52" width="114" height="36" rx="6" fill="#E8F0FB" stroke="#4A90D9" stroke-width="1.4"/>
+  <text x="200" y="70"  text-anchor="middle" font-weight="600" fill="#1a3a6b">Gateway</text>
+  <text x="200" y="84"  text-anchor="middle" font-size="10" fill="#4A90D9">:8000</text>
+
+  <rect x="283" y="52" width="114" height="36" rx="6" fill="#E4F5EC" stroke="#2E9E63" stroke-width="1.4"/>
+  <text x="340" y="70"  text-anchor="middle" font-weight="600" fill="#0d4025">RAG</text>
+  <text x="340" y="84"  text-anchor="middle" font-size="10" fill="#2E9E63">:8003</text>
+
+  <rect x="419" y="52" width="114" height="36" rx="6" fill="#FEF4E4" stroke="#E8952A" stroke-width="1.4"/>
+  <text x="476" y="70"  text-anchor="middle" font-weight="600" fill="#7a4400">LiteLLM</text>
+  <text x="476" y="84"  text-anchor="middle" font-size="10" fill="#E8952A">:4000</text>
+
+  <rect x="553" y="52" width="112" height="36" rx="6" fill="#F5F0FB" stroke="#8B5CF6" stroke-width="1.4"/>
+  <text x="609" y="70"  text-anchor="middle" font-weight="600" fill="#3b1a7a">stub-backend</text>
+  <text x="609" y="84"  text-anchor="middle" font-size="10" fill="#8B5CF6">:8002</text>
+
+  <rect x="693" y="52" width="112" height="36" rx="6" fill="#EEF2F5" stroke="#5B7FA8" stroke-width="1.4"/>
+  <text x="749" y="70"  text-anchor="middle" font-weight="600" fill="#1a3050">postgres</text>
+  <text x="749" y="84"  text-anchor="middle" font-size="10" fill="#5B7FA8">:5432</text>
+
+  <!-- ── Lifelines ── -->
+  <line x1="64"  y1="88" x2="64"  y2="622" stroke="#cccccc" stroke-width="1" stroke-dasharray="5 3"/>
+  <line x1="200" y1="88" x2="200" y2="622" stroke="#4A90D9" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="340" y1="88" x2="340" y2="622" stroke="#2E9E63" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="476" y1="88" x2="476" y2="622" stroke="#E8952A" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="609" y1="88" x2="609" y2="622" stroke="#8B5CF6" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="749" y1="88" x2="749" y2="622" stroke="#5B7FA8" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+
+  <!-- ── Step 1  y=126  Client→Gateway ── -->
+  <circle cx="22" cy="126" r="9" fill="#555555"/>
+  <text x="22" y="130" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">1</text>
+  <line x1="64" y1="126" x2="196" y2="126" stroke="#4A90D9" stroke-width="1.6" marker-end="url(#mc)"/>
+  <text x="130" y="120" text-anchor="middle" font-size="10" fill="#4A90D9">POST /capabilities</text>
+  <text x="130" y="140" text-anchor="middle" font-size="9" fill="#666666">{capability:"rag", operation:"query", payload:{question, top_k, collection}}</text>
+
+  <!-- ── Step 2  y=158  Gateway→Client 202 ── -->
+  <circle cx="22" cy="158" r="9" fill="#555555"/>
+  <text x="22" y="162" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">2</text>
+  <line x1="200" y1="158" x2="68" y2="158" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="130" y="152" text-anchor="middle" font-size="10" fill="#888888">202 Accepted + job_id</text>
+
+  <!-- ── Async boundary ── -->
+  <rect x="36" y="170" width="764" height="20" rx="4" fill="#FFFBEA" stroke="#D4AF37" stroke-width="1" stroke-dasharray="6 3"/>
+  <text x="410" y="184" text-anchor="middle" font-size="10" fill="#7a6000" font-weight="500">— background task spawned by gateway (asyncio.create_task) —</text>
+
+  <!-- ── Step 3  y=200  Gateway→RAG ── -->
+  <circle cx="22" cy="200" r="9" fill="#555555"/>
+  <text x="22" y="204" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">3</text>
+  <line x1="200" y1="200" x2="336" y2="200" stroke="#2E9E63" stroke-width="1.6" marker-end="url(#mr)"/>
+  <text x="270" y="194" text-anchor="middle" font-size="10" fill="#2E9E63">POST /execute</text>
+  <text x="270" y="212" text-anchor="middle" font-size="9" fill="#666666">{operation:"query", question, top_k, collection}</text>
+
+  <!-- ── Step 4  y=232  RAG→LiteLLM embed question ── -->
+  <circle cx="22" cy="232" r="9" fill="#555555"/>
+  <text x="22" y="236" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">4</text>
+  <line x1="340" y1="232" x2="472" y2="232" stroke="#E8952A" stroke-width="1.6" marker-end="url(#ml)"/>
+  <text x="408" y="226" text-anchor="middle" font-size="10" fill="#E8952A">POST /v1/embeddings</text>
+  <text x="408" y="244" text-anchor="middle" font-size="9" fill="#666666">{model:"embed-model", input:[question]}</text>
+
+  <!-- ── Step 5  y=260  LiteLLM→Stub embed ── -->
+  <circle cx="22" cy="260" r="9" fill="#555555"/>
+  <text x="22" y="264" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">5</text>
+  <line x1="476" y1="260" x2="605" y2="260" stroke="#8B5CF6" stroke-width="1.6" marker-end="url(#ms)"/>
+  <text x="542" y="254" text-anchor="middle" font-size="10" fill="#8B5CF6">POST /v1/embeddings</text>
+  <text x="542" y="272" text-anchor="middle" font-size="9" fill="#666666">routed to stub-backend</text>
+
+  <!-- ── Step 6  y=286  Stub→LiteLLM dashed ── -->
+  <circle cx="22" cy="286" r="9" fill="#555555"/>
+  <text x="22" y="290" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">6</text>
+  <line x1="609" y1="286" x2="480" y2="286" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="544" y="280" text-anchor="middle" font-size="10" fill="#888888">[{embedding:[768 floats]}]</text>
+
+  <!-- ── Step 7  y=308  LiteLLM→RAG dashed ── -->
+  <circle cx="22" cy="308" r="9" fill="#555555"/>
+  <text x="22" y="312" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">7</text>
+  <line x1="476" y1="308" x2="344" y2="308" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="408" y="302" text-anchor="middle" font-size="10" fill="#888888">question embedding (768-dim)</text>
+
+  <!-- ── Step 8  y=330  RAG→Postgres ANN SELECT ── -->
+  <circle cx="22" cy="330" r="9" fill="#555555"/>
+  <text x="22" y="334" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">8</text>
+  <line x1="340" y1="330" x2="745" y2="330" stroke="#5B7FA8" stroke-width="1.6" marker-end="url(#mp)"/>
+  <text x="542" y="324" text-anchor="middle" font-size="10" fill="#5B7FA8">SELECT … ORDER BY embedding &lt;=&gt; $1 LIMIT top_k</text>
+  <text x="542" y="342" text-anchor="middle" font-size="9" fill="#666666">cosine distance (HNSW index) WHERE collection = $2</text>
+
+  <!-- ── Step 9  y=360  Postgres→RAG ANN results ── -->
+  <circle cx="22" cy="360" r="9" fill="#555555"/>
+  <text x="22" y="364" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">9</text>
+  <line x1="749" y1="360" x2="344" y2="360" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="542" y="354" text-anchor="middle" font-size="10" fill="#888888">[{content, score}, …] top-k chunks ranked by similarity</text>
+
+  <!-- ── Step 10  y=388  RAG self-loop: build context ── -->
+  <circle cx="22" cy="391" r="9" fill="#555555"/>
+  <text x="22" y="395" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">10</text>
+  <path d="M340,384 h48 v18 h-48" fill="none" stroke="#2E9E63" stroke-width="1.4" stroke-dasharray="4 2" marker-end="url(#mr)"/>
+  <text x="394" y="392" text-anchor="start" font-size="10" fill="#2E9E63">build system prompt</text>
+  <text x="394" y="406" text-anchor="start" font-size="9" fill="#666666">"Context:\n{chunk₀}\n{chunk₁}…\n\nQuestion: {question}"</text>
+
+  <!-- ── Step 11  y=420  RAG→LiteLLM generate ── -->
+  <circle cx="22" cy="420" r="9" fill="#555555"/>
+  <text x="22" y="424" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">11</text>
+  <line x1="340" y1="420" x2="472" y2="420" stroke="#E8952A" stroke-width="1.6" marker-end="url(#ml)"/>
+  <text x="408" y="414" text-anchor="middle" font-size="10" fill="#E8952A">POST /v1/chat/completions</text>
+  <text x="408" y="432" text-anchor="middle" font-size="9" fill="#666666">{model:"deepseek-v4-flash", messages:[system, user]}</text>
+
+  <!-- ── Step 12  y=450  LiteLLM→Stub generate ── -->
+  <circle cx="22" cy="450" r="9" fill="#555555"/>
+  <text x="22" y="454" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">12</text>
+  <line x1="476" y1="450" x2="605" y2="450" stroke="#8B5CF6" stroke-width="1.6" marker-end="url(#ms)"/>
+  <text x="542" y="444" text-anchor="middle" font-size="10" fill="#8B5CF6">POST /v1/chat/completions</text>
+  <text x="542" y="462" text-anchor="middle" font-size="9" fill="#666666">routed to stub-backend (deepseek-v4-flash)</text>
+
+  <!-- ── Step 13  y=476  Stub→LiteLLM context-echo ── -->
+  <circle cx="22" cy="476" r="9" fill="#555555"/>
+  <text x="22" y="480" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">13</text>
+  <line x1="609" y1="476" x2="480" y2="476" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="544" y="470" text-anchor="middle" font-size="10" fill="#888888">{content: &lt;echoes Context block&gt;} + usage</text>
+
+  <!-- ── Step 14  y=498  LiteLLM→RAG generation ── -->
+  <circle cx="22" cy="498" r="9" fill="#555555"/>
+  <text x="22" y="502" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">14</text>
+  <line x1="476" y1="498" x2="344" y2="498" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="408" y="492" text-anchor="middle" font-size="10" fill="#888888">generation response (answer text + token usage)</text>
+
+  <!-- ── Step 15  y=522  RAG→Gateway result + provenance ── -->
+  <circle cx="22" cy="522" r="9" fill="#555555"/>
+  <text x="22" y="526" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">15</text>
+  <line x1="340" y1="522" x2="204" y2="522" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="270" y="516" text-anchor="middle" font-size="10" fill="#888888">{answer, sources:[{content,score},…], confidence}</text>
+  <text x="270" y="534" text-anchor="middle" font-size="9" fill="#666666">+ provenance {backend_used, tokens_in, tokens_out, cost_usd, latency_ms}</text>
+
+  <!-- ── Step 16  y=552  Gateway self-loop ── -->
+  <circle cx="22" cy="554" r="9" fill="#555555"/>
+  <text x="22" y="558" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">16</text>
+  <path d="M200,548 h48 v18 h-48" fill="none" stroke="#4A90D9" stroke-width="1.4" stroke-dasharray="4 2" marker-end="url(#mc)"/>
+  <text x="258" y="555" text-anchor="start" font-size="10" fill="#4A90D9">job.status = "succeeded"</text>
+  <text x="258" y="568" text-anchor="start" font-size="9" fill="#666666">confidence = max(0.0, 1 − cosine_distance) from top chunk</text>
+
+  <!-- ── Step 17  y=586  Client→Gateway GET /jobs ── -->
+  <circle cx="22" cy="586" r="9" fill="#555555"/>
+  <text x="22" y="590" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">17</text>
+  <line x1="64" y1="586" x2="196" y2="586" stroke="#4A90D9" stroke-width="1.6" marker-end="url(#mc)"/>
+  <text x="130" y="580" text-anchor="middle" font-size="10" fill="#4A90D9">GET /jobs/{job_id}</text>
+
+  <!-- ── Step 18  y=612  Gateway→Client 200 ── -->
+  <circle cx="22" cy="612" r="9" fill="#555555"/>
+  <text x="22" y="616" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">18</text>
+  <line x1="200" y1="612" x2="68" y2="612" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="130" y="606" text-anchor="middle" font-size="10" fill="#888888">200 {status:"succeeded", result:{answer, sources, confidence}, provenance, gates}</text>
+</svg>

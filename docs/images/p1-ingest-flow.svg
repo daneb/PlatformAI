@@ -1,0 +1,154 @@
+<svg viewBox="0 0 820 624" xmlns="http://www.w3.org/2000/svg" role="img" font-family="system-ui,sans-serif" font-size="12">
+  <title>P1 RAG — Ingest Flow</title>
+  <desc>14-step sequence: client submits ingest → 202 → background chunk+embed via LiteLLM/stub → INSERT rag_chunks → job succeeds → client polls result.</desc>
+
+  <rect width="820" height="624" fill="#ffffff"/>
+  <text x="410" y="24" text-anchor="middle" font-size="15" font-weight="600" fill="#111111">P1 RAG — Ingest Flow</text>
+  <text x="410" y="41" text-anchor="middle" font-size="11" fill="#666666">POST /capabilities {operation:"ingest"} → 202 → background chunk + embed + store</text>
+
+  <defs>
+    <marker id="mc" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#4A90D9"/></marker>
+    <marker id="mr" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#2E9E63"/></marker>
+    <marker id="ml" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#E8952A"/></marker>
+    <marker id="ms" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#8B5CF6"/></marker>
+    <marker id="mp" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#5B7FA8"/></marker>
+    <marker id="mg" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#888888"/></marker>
+  </defs>
+
+  <!-- ── Participant boxes  y=52..88 ── -->
+  <!-- Client cx=64 -->
+  <rect x="16"  y="52" width="96"  height="36" rx="6" fill="#f5f5f5" stroke="#cccccc" stroke-width="1.4"/>
+  <text x="64"  y="70"  text-anchor="middle" font-weight="600" fill="#333333">Client</text>
+  <text x="64"  y="84"  text-anchor="middle" font-size="10" fill="#777777">curl / pytest</text>
+
+  <!-- Gateway cx=200 -->
+  <rect x="143" y="52" width="114" height="36" rx="6" fill="#E8F0FB" stroke="#4A90D9" stroke-width="1.4"/>
+  <text x="200" y="70"  text-anchor="middle" font-weight="600" fill="#1a3a6b">Gateway</text>
+  <text x="200" y="84"  text-anchor="middle" font-size="10" fill="#4A90D9">:8000</text>
+
+  <!-- RAG cx=340 -->
+  <rect x="283" y="52" width="114" height="36" rx="6" fill="#E4F5EC" stroke="#2E9E63" stroke-width="1.4"/>
+  <text x="340" y="70"  text-anchor="middle" font-weight="600" fill="#0d4025">RAG</text>
+  <text x="340" y="84"  text-anchor="middle" font-size="10" fill="#2E9E63">:8003</text>
+
+  <!-- LiteLLM cx=476 -->
+  <rect x="419" y="52" width="114" height="36" rx="6" fill="#FEF4E4" stroke="#E8952A" stroke-width="1.4"/>
+  <text x="476" y="70"  text-anchor="middle" font-weight="600" fill="#7a4400">LiteLLM</text>
+  <text x="476" y="84"  text-anchor="middle" font-size="10" fill="#E8952A">:4000</text>
+
+  <!-- stub-backend cx=609 -->
+  <rect x="553" y="52" width="112" height="36" rx="6" fill="#F5F0FB" stroke="#8B5CF6" stroke-width="1.4"/>
+  <text x="609" y="70"  text-anchor="middle" font-weight="600" fill="#3b1a7a">stub-backend</text>
+  <text x="609" y="84"  text-anchor="middle" font-size="10" fill="#8B5CF6">:8002</text>
+
+  <!-- postgres cx=749 -->
+  <rect x="693" y="52" width="112" height="36" rx="6" fill="#EEF2F5" stroke="#5B7FA8" stroke-width="1.4"/>
+  <text x="749" y="70"  text-anchor="middle" font-weight="600" fill="#1a3050">postgres</text>
+  <text x="749" y="84"  text-anchor="middle" font-size="10" fill="#5B7FA8">:5432</text>
+
+  <!-- ── Lifelines ── -->
+  <line x1="64"  y1="88" x2="64"  y2="606" stroke="#cccccc" stroke-width="1" stroke-dasharray="5 3"/>
+  <line x1="200" y1="88" x2="200" y2="606" stroke="#4A90D9" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="340" y1="88" x2="340" y2="606" stroke="#2E9E63" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="476" y1="88" x2="476" y2="606" stroke="#E8952A" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="609" y1="88" x2="609" y2="606" stroke="#8B5CF6" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="749" y1="88" x2="749" y2="606" stroke="#5B7FA8" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+
+  <!-- ── Step badge helper (circle at x=22) ── -->
+  <!-- Step 1  y=130 -->
+  <circle cx="22" cy="130" r="9" fill="#555555"/>
+  <text x="22" y="134" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">1</text>
+  <line x1="64" y1="130" x2="196" y2="130" stroke="#4A90D9" stroke-width="1.6" marker-end="url(#mc)"/>
+  <text x="130" y="124" text-anchor="middle" font-size="10" fill="#4A90D9">POST /capabilities</text>
+  <text x="130" y="144" text-anchor="middle" font-size="9" fill="#666666">{capability:"rag", operation:"ingest", payload:{text, collection}}</text>
+
+  <!-- Step 2  y=164  Gateway→Client dashed -->
+  <circle cx="22" cy="164" r="9" fill="#555555"/>
+  <text x="22" y="168" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">2</text>
+  <line x1="200" y1="164" x2="68" y2="164" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="130" y="158" text-anchor="middle" font-size="10" fill="#888888">202 Accepted + job_id</text>
+
+  <!-- ── Async boundary ── -->
+  <rect x="36" y="177" width="764" height="22" rx="4" fill="#FFFBEA" stroke="#D4AF37" stroke-width="1" stroke-dasharray="6 3"/>
+  <text x="410" y="192" text-anchor="middle" font-size="10" fill="#7a6000" font-weight="500">— background task spawned by gateway (asyncio.create_task) —</text>
+
+  <!-- Step 3  y=219  Gateway→RAG -->
+  <circle cx="22" cy="219" r="9" fill="#555555"/>
+  <text x="22" y="223" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">3</text>
+  <line x1="200" y1="219" x2="336" y2="219" stroke="#2E9E63" stroke-width="1.6" marker-end="url(#mr)"/>
+  <text x="270" y="213" text-anchor="middle" font-size="10" fill="#2E9E63">POST /execute</text>
+  <text x="270" y="232" text-anchor="middle" font-size="9" fill="#666666">{operation:"ingest", text, collection}</text>
+
+  <!-- Step 4  y=256  RAG self-loop: chunk_text -->
+  <circle cx="22" cy="262" r="9" fill="#555555"/>
+  <text x="22" y="266" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">4</text>
+  <path d="M340,254 h48 v20 h-48" fill="none" stroke="#2E9E63" stroke-width="1.4" stroke-dasharray="4 2" marker-end="url(#mr)"/>
+  <text x="395" y="262" text-anchor="start" font-size="10" fill="#2E9E63">chunk_text(text)</text>
+  <text x="395" y="276" text-anchor="start" font-size="9" fill="#666666">→ N chunks (≤ 512 chars each)</text>
+
+  <!-- Step 5  y=298  RAG→LiteLLM: embeddings request -->
+  <circle cx="22" cy="298" r="9" fill="#555555"/>
+  <text x="22" y="302" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">5</text>
+  <line x1="340" y1="298" x2="472" y2="298" stroke="#E8952A" stroke-width="1.6" marker-end="url(#ml)"/>
+  <text x="408" y="292" text-anchor="middle" font-size="10" fill="#E8952A">POST /v1/embeddings</text>
+  <text x="408" y="310" text-anchor="middle" font-size="9" fill="#666666">{model:"embed-model", input:[chunk₀…chunkₙ]}</text>
+
+  <!-- Step 6  y=334  LiteLLM→Stub: proxy -->
+  <circle cx="22" cy="334" r="9" fill="#555555"/>
+  <text x="22" y="338" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">6</text>
+  <line x1="476" y1="334" x2="605" y2="334" stroke="#8B5CF6" stroke-width="1.6" marker-end="url(#ms)"/>
+  <text x="542" y="328" text-anchor="middle" font-size="10" fill="#8B5CF6">POST /v1/embeddings</text>
+  <text x="542" y="346" text-anchor="middle" font-size="9" fill="#666666">routed to stub-backend</text>
+
+  <!-- Step 7  y=368  Stub→LiteLLM: embeddings (dashed) -->
+  <circle cx="22" cy="368" r="9" fill="#555555"/>
+  <text x="22" y="372" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">7</text>
+  <line x1="609" y1="368" x2="480" y2="368" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="544" y="362" text-anchor="middle" font-size="10" fill="#888888">[{index, embedding:[768 floats]}, …]</text>
+  <text x="544" y="380" text-anchor="middle" font-size="9" fill="#666666">deterministic unit-vector per chunk</text>
+
+  <!-- Step 8  y=404  LiteLLM→RAG: embeddings (dashed) -->
+  <circle cx="22" cy="404" r="9" fill="#555555"/>
+  <text x="22" y="408" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">8</text>
+  <line x1="476" y1="404" x2="344" y2="404" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="408" y="398" text-anchor="middle" font-size="10" fill="#888888">embeddings response</text>
+
+  <!-- Step 9  y=435  RAG→Postgres: INSERT -->
+  <circle cx="22" cy="435" r="9" fill="#555555"/>
+  <text x="22" y="439" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">9</text>
+  <line x1="340" y1="435" x2="745" y2="435" stroke="#5B7FA8" stroke-width="1.6" marker-end="url(#mp)"/>
+  <text x="542" y="429" text-anchor="middle" font-size="10" fill="#5B7FA8">INSERT INTO rag_chunks</text>
+  <text x="542" y="447" text-anchor="middle" font-size="9" fill="#666666">(collection, document_id, chunk_index, content, embedding)</text>
+
+  <!-- Step 10  y=470  Postgres→RAG: OK (dashed) -->
+  <circle cx="22" cy="470" r="9" fill="#555555"/>
+  <text x="22" y="474" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">10</text>
+  <line x1="749" y1="470" x2="344" y2="470" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="542" y="464" text-anchor="middle" font-size="10" fill="#888888">INSERT OK — N rows stored</text>
+
+  <!-- Step 11  y=502  RAG→Gateway: result + provenance (dashed) -->
+  <circle cx="22" cy="502" r="9" fill="#555555"/>
+  <text x="22" y="506" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">11</text>
+  <line x1="340" y1="502" x2="204" y2="502" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="270" y="496" text-anchor="middle" font-size="10" fill="#888888">{chunks_stored:N, document_id, collection}</text>
+  <text x="270" y="514" text-anchor="middle" font-size="9" fill="#666666">+ provenance {backend_used, tokens_in, tokens_out, cost_usd, latency_ms}</text>
+
+  <!-- Step 12  y=538  Gateway self-loop -->
+  <circle cx="22" cy="541" r="9" fill="#555555"/>
+  <text x="22" y="545" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">12</text>
+  <path d="M200,534 h48 v18 h-48" fill="none" stroke="#4A90D9" stroke-width="1.4" stroke-dasharray="4 2" marker-end="url(#mc)"/>
+  <text x="258" y="541" text-anchor="start" font-size="10" fill="#4A90D9">job.status = "succeeded"</text>
+  <text x="258" y="555" text-anchor="start" font-size="9" fill="#666666">job.result + job.provenance + job.gates persisted</text>
+
+  <!-- Step 13  y=576  Client→Gateway: GET /jobs -->
+  <circle cx="22" cy="576" r="9" fill="#555555"/>
+  <text x="22" y="580" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">13</text>
+  <line x1="64" y1="576" x2="196" y2="576" stroke="#4A90D9" stroke-width="1.6" marker-end="url(#mc)"/>
+  <text x="130" y="570" text-anchor="middle" font-size="10" fill="#4A90D9">GET /jobs/{job_id}</text>
+
+  <!-- Step 14  y=604  Gateway→Client: 200 succeeded (dashed) -->
+  <circle cx="22" cy="604" r="9" fill="#555555"/>
+  <text x="22" y="608" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">14</text>
+  <line x1="200" y1="604" x2="68" y2="604" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="130" y="598" text-anchor="middle" font-size="10" fill="#888888">200 {status:"succeeded", result, provenance, gates}</text>
+</svg>

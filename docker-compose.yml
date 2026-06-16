@@ -1,5 +1,21 @@
 services:
 
+  # ── Postgres + pgvector ── vector store for RAG
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: platform
+      POSTGRES_PASSWORD: platform
+      POSTGRES_DB: platform
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U platform -d platform"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
   # ── Stub backend ── mock OpenAI-compatible API; replays fixtures in tests
   stub-backend:
     build: ./stub_backend
@@ -51,6 +67,31 @@ services:
       retries: 5
       start_period: 15s
 
+  # ── RAG spoke ── P1 retrieval-augmented generation
+  capability-rag:
+    build:
+      context: .
+      dockerfile: capabilities/rag/Dockerfile
+    ports:
+      - "8003:8003"
+    environment:
+      LITELLM_URL: http://litellm:4000
+      EMBED_MODEL: embed-model
+      GEN_MODEL: deepseek-v4-flash
+      LITELLM_KEY: sk-platform-dev
+      DATABASE_URL: postgresql://platform:platform@postgres:5432/platform
+    depends_on:
+      litellm:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+
   # ── Gateway ── control plane; all traffic enters here
   gateway:
     build:
@@ -60,6 +101,8 @@ services:
       - "8000:8000"
     depends_on:
       capability-summarize:
+        condition: service_healthy
+      capability-rag:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
