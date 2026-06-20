@@ -116,9 +116,9 @@ def test_unknown_job_returns_404():
 
 @pytest.mark.integration
 def test_unavailable_capability_returns_404():
-    # "ocr" is a valid envelope value that has no spoke registered yet
+    # "vision" is a valid envelope value that has no spoke registered yet
     req = _summarize_request()
-    req["capability"] = "ocr"
+    req["capability"] = "vision"
     resp = httpx.post(f"{BASE}/capabilities", json=req, timeout=5.0)
     assert resp.status_code == 404
 

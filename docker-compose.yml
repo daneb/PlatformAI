@@ -16,6 +16,23 @@ services:
       retries: 10
       start_period: 10s
 
+  # ── MinIO ── S3-compatible object store for OCR/IDP document refs
+  minio:
+    image: minio/minio:latest
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: platform
+      MINIO_ROOT_PASSWORD: platform123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
   # ── Stub backend ── mock OpenAI-compatible API; replays fixtures in tests
   stub-backend:
     build: ./stub_backend
@@ -92,6 +109,52 @@ services:
       retries: 5
       start_period: 20s
 
+  # ── OCR spoke ── P2 local-first text/layout extraction (Tesseract)
+  capability-ocr:
+    build:
+      context: .
+      dockerfile: capabilities/ocr/Dockerfile
+    ports:
+      - "8004:8004"
+    environment:
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: platform
+      MINIO_SECRET_KEY: platform123
+      MINIO_BUCKET: documents
+    depends_on:
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8004/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+
+  # ── IDP spoke ── P2 orchestrator: OCR.extract_layout → classify → extract_fields → validate
+  capability-idp:
+    build:
+      context: .
+      dockerfile: capabilities/idp/Dockerfile
+    ports:
+      - "8005:8005"
+    environment:
+      LITELLM_URL: http://litellm:4000
+      GEN_MODEL: deepseek-v4-flash
+      LITELLM_KEY: sk-platform-dev
+      OCR_URL: http://capability-ocr:8004
+    depends_on:
+      litellm:
+        condition: service_healthy
+      capability-ocr:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+
   # ── Gateway ── control plane; all traffic enters here
   gateway:
     build:
@@ -103,6 +166,10 @@ services:
       capability-summarize:
         condition: service_healthy
       capability-rag:
+        condition: service_healthy
+      capability-ocr:
+        condition: service_healthy
+      capability-idp:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]

@@ -13,6 +13,7 @@ from __future__ import annotations
 import hashlib
 import json
 import random
+import re
 import struct
 import time
 import uuid
@@ -72,6 +73,36 @@ def _rag_answer_from_context(messages: list[_Message]) -> str:
     return "[STUB] Canned response from stub backend. No real model was called."
 
 
+def _stub_classify(messages: list[_Message]) -> str | None:
+    """Deterministic doc-type classification: keyword match against the doc text."""
+    system = next((m.content for m in messages if m.role == "system"), "")
+    user = next((m.content for m in messages if m.role == "user"), "")
+    match = re.search(r"one of:\s*(.+?)\.", system)
+    if not match:
+        return None
+    doc_types = [t.strip() for t in match.group(1).split(",")]
+    lower_text = user.lower()
+    for doc_type in doc_types:
+        if doc_type.lower() != "other" and doc_type.lower() in lower_text:
+            return doc_type
+    return doc_types[-1] if doc_types else "other"
+
+
+def _stub_extract_fields(messages: list[_Message]) -> dict[str, Any] | None:
+    """Deterministic field extraction: regex 'field: value' lookup in the doc text."""
+    system = next((m.content for m in messages if m.role == "system"), "")
+    user = next((m.content for m in messages if m.role == "user"), "")
+    match = re.search(r"Extract the following fields as JSON:\s*(.+?)\.", system)
+    if not match:
+        return None
+    fields = [f.strip() for f in match.group(1).split(",")]
+    result: dict[str, Any] = {}
+    for field in fields:
+        field_match = re.search(rf"{re.escape(field)}\s*[:\-]\s*(.+)", user, re.IGNORECASE)
+        result[field] = field_match.group(1).strip().splitlines()[0] if field_match else None
+    return result
+
+
 # ── endpoints ─────────────────────────────────────────────────────────────────
 
 @app.post("/v1/chat/completions")
@@ -80,7 +111,13 @@ async def chat_completions(req: _ChatRequest) -> dict[str, Any]:
     if fixture.exists():
         return json.loads(fixture.read_text())
 
-    content = _rag_answer_from_context(req.messages)
+    system = next((m.content for m in req.messages if m.role == "system"), "")
+    if "Classify this document into exactly one of:" in system:
+        content = json.dumps({"doc_type": _stub_classify(req.messages) or "other"})
+    elif "Extract the following fields as JSON:" in system:
+        content = json.dumps(_stub_extract_fields(req.messages) or {})
+    else:
+        content = _rag_answer_from_context(req.messages)
     return {
         "id": f"chatcmpl-{uuid.uuid4().hex[:12]}",
         "object": "chat.completion",

@@ -15,6 +15,8 @@ app = FastAPI(title="AI Platform Gateway")
 _ROUTES: dict[str, str] = {
     "summarize": "http://capability-summarize:8001",
     "rag": "http://capability-rag:8003",
+    "ocr": "http://capability-ocr:8004",
+    "idp": "http://capability-idp:8005",
 }
 
 
