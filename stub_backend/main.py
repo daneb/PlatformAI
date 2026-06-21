@@ -33,7 +33,16 @@ _EMBED_DIM = 768
 
 class _Message(BaseModel):
     role: str
-    content: str
+    content: str | list[Any]
+
+    def text(self) -> str:
+        if isinstance(self.content, str):
+            return self.content
+        return " ".join(
+            part.get("text", "")
+            for part in self.content
+            if isinstance(part, dict) and part.get("type") == "text"
+        )
 
 
 class _ChatRequest(BaseModel):
@@ -67,16 +76,17 @@ def _rag_answer_from_context(messages: list[_Message]) -> str:
     without calling any real model.
     """
     for msg in messages:
-        if msg.role == "system" and "Context:" in msg.content:
-            ctx_start = msg.content.index("Context:") + len("Context:")
-            return msg.content[ctx_start:].strip()[:600]
+        text = msg.text()
+        if msg.role == "system" and "Context:" in text:
+            ctx_start = text.index("Context:") + len("Context:")
+            return text[ctx_start:].strip()[:600]
     return "[STUB] Canned response from stub backend. No real model was called."
 
 
 def _stub_classify(messages: list[_Message]) -> str | None:
     """Deterministic doc-type classification: keyword match against the doc text."""
-    system = next((m.content for m in messages if m.role == "system"), "")
-    user = next((m.content for m in messages if m.role == "user"), "")
+    system = next((m.text() for m in messages if m.role == "system"), "")
+    user = next((m.text() for m in messages if m.role == "user"), "")
     match = re.search(r"one of:\s*(.+?)\.", system)
     if not match:
         return None
@@ -90,8 +100,8 @@ def _stub_classify(messages: list[_Message]) -> str | None:
 
 def _stub_extract_fields(messages: list[_Message]) -> dict[str, Any] | None:
     """Deterministic field extraction: regex 'field: value' lookup in the doc text."""
-    system = next((m.content for m in messages if m.role == "system"), "")
-    user = next((m.content for m in messages if m.role == "user"), "")
+    system = next((m.text() for m in messages if m.role == "system"), "")
+    user = next((m.text() for m in messages if m.role == "user"), "")
     match = re.search(r"Extract the following fields as JSON:\s*(.+?)\.", system)
     if not match:
         return None
@@ -103,6 +113,14 @@ def _stub_extract_fields(messages: list[_Message]) -> dict[str, Any] | None:
     return result
 
 
+def _stub_vision_detect(messages: list[_Message]) -> str:
+    """Return all requested labels as present — deterministic stub for detect operation."""
+    user_text = next((m.text() for m in messages if m.role == "user"), "")
+    match = re.search(r"Detect these labels:\s*(.+)", user_text)
+    labels = [l.strip() for l in match.group(1).split(",")] if match else []
+    return json.dumps({"detections": [{"label": l, "present": True, "confidence": 0.9} for l in labels]})
+
+
 # ── endpoints ─────────────────────────────────────────────────────────────────
 
 @app.post("/v1/chat/completions")
@@ -111,13 +129,21 @@ async def chat_completions(req: _ChatRequest) -> dict[str, Any]:
     if fixture.exists():
         return json.loads(fixture.read_text())
 
-    system = next((m.content for m in req.messages if m.role == "system"), "")
+    system = next((m.text() for m in req.messages if m.role == "system"), "")
     if "Classify this document into exactly one of:" in system:
         content = json.dumps({"doc_type": _stub_classify(req.messages) or "other"})
     elif "Extract the following fields as JSON:" in system:
         content = json.dumps(_stub_extract_fields(req.messages) or {})
+    elif "Describe the image sent by the user" in system:
+        content = "A simple white test image containing rendered text on a plain background."
+    elif "Detect objects in the image" in system:
+        content = _stub_vision_detect(req.messages)
+    elif "Answer the user's question about the image" in system:
+        content = "Stub answer to your question about the image."
     else:
         content = _rag_answer_from_context(req.messages)
+
+    prompt_tokens = sum(len(m.text().split()) for m in req.messages)
     return {
         "id": f"chatcmpl-{uuid.uuid4().hex[:12]}",
         "object": "chat.completion",
@@ -131,9 +157,9 @@ async def chat_completions(req: _ChatRequest) -> dict[str, Any]:
             }
         ],
         "usage": {
-            "prompt_tokens": sum(len(m.content.split()) for m in req.messages),
+            "prompt_tokens": prompt_tokens,
             "completion_tokens": len(content.split()),
-            "total_tokens": sum(len(m.content.split()) for m in req.messages) + len(content.split()),
+            "total_tokens": prompt_tokens + len(content.split()),
         },
     }
 

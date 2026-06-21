@@ -1,0 +1,157 @@
+<svg viewBox="0 0 820 660" xmlns="http://www.w3.org/2000/svg" role="img" font-family="system-ui,sans-serif" font-size="12">
+  <title>P3 Vision — describe/detect/ask Flow</title>
+  <desc>13-step sequence: client submits vision job → 202 → Vision loads image from MinIO → base64-encodes → sends multimodal chat/completions to LiteLLM → stub returns description → job succeeds → client polls.</desc>
+
+  <rect width="820" height="660" fill="#ffffff"/>
+  <text x="410" y="24" text-anchor="middle" font-size="15" font-weight="600" fill="#111111">P3 Vision — describe / detect / ask Flow</text>
+  <text x="410" y="41" text-anchor="middle" font-size="11" fill="#666666">POST /capabilities {operation:"describe"|"detect"|"ask", payload:{object_ref, …}} → multimodal inference via LiteLLM</text>
+
+  <defs>
+    <marker id="mc" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#4A90D9"/></marker>
+    <marker id="mv" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#7B5EA7"/></marker>
+    <marker id="mm" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#B8860B"/></marker>
+    <marker id="ml" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#E8952A"/></marker>
+    <marker id="ms" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#8B5CF6"/></marker>
+    <marker id="mg" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#888888"/></marker>
+  </defs>
+
+  <!-- ── Participant boxes  y=52..88 ── -->
+  <!-- 6 participants spread across 820 -->
+  <!-- cx=68, 196, 324, 452, 580, 726 (last one is LiteLLM+stub combined) -->
+
+  <!-- Client cx=68 -->
+  <rect x="16"  y="52" width="104" height="36" rx="6" fill="#f5f5f5" stroke="#cccccc" stroke-width="1.4"/>
+  <text x="68"  y="70" text-anchor="middle" font-weight="600" fill="#333333">Client</text>
+  <text x="68"  y="84" text-anchor="middle" font-size="10" fill="#777777">curl / pytest</text>
+
+  <!-- Gateway cx=196 -->
+  <rect x="144" y="52" width="104" height="36" rx="6" fill="#E8F0FB" stroke="#4A90D9" stroke-width="1.4"/>
+  <text x="196" y="70" text-anchor="middle" font-weight="600" fill="#1a3a6b">Gateway</text>
+  <text x="196" y="84" text-anchor="middle" font-size="10" fill="#4A90D9">:8000</text>
+
+  <!-- Vision cx=324 -->
+  <rect x="272" y="52" width="104" height="36" rx="6" fill="#F0EBF9" stroke="#7B5EA7" stroke-width="1.4"/>
+  <text x="324" y="70" text-anchor="middle" font-weight="600" fill="#3d2077">Vision</text>
+  <text x="324" y="84" text-anchor="middle" font-size="10" fill="#7B5EA7">:8006</text>
+
+  <!-- MinIO cx=452 -->
+  <rect x="400" y="52" width="104" height="36" rx="6" fill="#FBF3DE" stroke="#B8860B" stroke-width="1.4"/>
+  <text x="452" y="70" text-anchor="middle" font-weight="600" fill="#6b4f00">MinIO</text>
+  <text x="452" y="84" text-anchor="middle" font-size="10" fill="#B8860B">:9000</text>
+
+  <!-- LiteLLM cx=580 -->
+  <rect x="528" y="52" width="104" height="36" rx="6" fill="#FEF4E4" stroke="#E8952A" stroke-width="1.4"/>
+  <text x="580" y="70" text-anchor="middle" font-weight="600" fill="#7a4400">LiteLLM</text>
+  <text x="580" y="84" text-anchor="middle" font-size="10" fill="#E8952A">:4000</text>
+
+  <!-- stub-backend cx=718 -->
+  <rect x="666" y="52" width="104" height="36" rx="6" fill="#F5F0FB" stroke="#8B5CF6" stroke-width="1.4"/>
+  <text x="718" y="70" text-anchor="middle" font-weight="600" fill="#3b1a7a">stub-backend</text>
+  <text x="718" y="84" text-anchor="middle" font-size="10" fill="#8B5CF6">:8002</text>
+
+  <!-- ── Lifelines ── -->
+  <line x1="68"  y1="88" x2="68"  y2="642" stroke="#cccccc" stroke-width="1" stroke-dasharray="5 3"/>
+  <line x1="196" y1="88" x2="196" y2="642" stroke="#4A90D9" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="324" y1="88" x2="324" y2="642" stroke="#7B5EA7" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="452" y1="88" x2="452" y2="642" stroke="#B8860B" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="580" y1="88" x2="580" y2="642" stroke="#E8952A" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="718" y1="88" x2="718" y2="642" stroke="#8B5CF6" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+
+  <!-- ── Step 1  y=128 ── -->
+  <circle cx="22" cy="128" r="9" fill="#555555"/>
+  <text x="22" y="132" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">1</text>
+  <line x1="68" y1="128" x2="192" y2="128" stroke="#4A90D9" stroke-width="1.6" marker-end="url(#mc)"/>
+  <text x="132" y="122" text-anchor="middle" font-size="10" fill="#4A90D9">POST /capabilities</text>
+  <text x="132" y="142" text-anchor="middle" font-size="9" fill="#666666">{capability:"vision", operation:"describe", payload:{object_ref:"s3://…"}}</text>
+
+  <!-- ── Step 2  y=160 ── -->
+  <circle cx="22" cy="160" r="9" fill="#555555"/>
+  <text x="22" y="164" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">2</text>
+  <line x1="196" y1="160" x2="72" y2="160" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="132" y="154" text-anchor="middle" font-size="10" fill="#888888">202 Accepted + job_id</text>
+
+  <!-- ── Async boundary ── -->
+  <rect x="36" y="172" width="764" height="20" rx="4" fill="#FFFBEA" stroke="#D4AF37" stroke-width="1" stroke-dasharray="6 3"/>
+  <text x="410" y="186" text-anchor="middle" font-size="10" fill="#7a6000" font-weight="500">— background task ——</text>
+
+  <!-- ── Step 3  y=206 ── -->
+  <circle cx="22" cy="206" r="9" fill="#555555"/>
+  <text x="22" y="210" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">3</text>
+  <line x1="196" y1="206" x2="320" y2="206" stroke="#7B5EA7" stroke-width="1.6" marker-end="url(#mv)"/>
+  <text x="260" y="200" text-anchor="middle" font-size="10" fill="#7B5EA7">POST /execute {operation:"describe"}</text>
+
+  <!-- ── Step 4  y=234 ── -->
+  <circle cx="22" cy="234" r="9" fill="#555555"/>
+  <text x="22" y="238" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">4</text>
+  <line x1="324" y1="234" x2="448" y2="234" stroke="#B8860B" stroke-width="1.6" marker-end="url(#mm)"/>
+  <text x="388" y="228" text-anchor="middle" font-size="10" fill="#B8860B">GetObject s3://documents/img.png</text>
+
+  <!-- ── Step 5  y=262 ── -->
+  <circle cx="22" cy="262" r="9" fill="#555555"/>
+  <text x="22" y="266" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">5</text>
+  <line x1="452" y1="262" x2="328" y2="262" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="388" y="256" text-anchor="middle" font-size="10" fill="#888888">raw image bytes</text>
+
+  <!-- ── Step 6  self-loop Vision ── y=294 ── -->
+  <circle cx="22" cy="294" r="9" fill="#555555"/>
+  <text x="22" y="298" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">6</text>
+  <path d="M324,294 Q358,294 358,306 Q358,318 324,318" fill="none" stroke="#7B5EA7" stroke-width="1.4" marker-end="url(#mv)"/>
+  <text x="378" y="302" text-anchor="start" font-size="10" fill="#7B5EA7">base64.b64encode(image_bytes)</text>
+  <text x="378" y="316" text-anchor="start" font-size="9" fill="#666666">builds data:{mime};base64,{b64} URL for OpenAI vision format</text>
+
+  <!-- ── Step 7  y=344 ── -->
+  <circle cx="22" cy="344" r="9" fill="#555555"/>
+  <text x="22" y="348" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">7</text>
+  <line x1="324" y1="344" x2="576" y2="344" stroke="#E8952A" stroke-width="1.6" marker-end="url(#ml)"/>
+  <text x="450" y="338" text-anchor="middle" font-size="10" fill="#E8952A">POST /v1/chat/completions (multimodal)</text>
+  <text x="450" y="357" text-anchor="middle" font-size="9" fill="#666666">messages:[{system:"Describe the image…"},{user:[{image_url},{text:"Describe…"}]}]</text>
+
+  <!-- ── Step 8  y=384 ── -->
+  <circle cx="22" cy="384" r="9" fill="#555555"/>
+  <text x="22" y="388" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">8</text>
+  <line x1="580" y1="384" x2="714" y2="384" stroke="#8B5CF6" stroke-width="1.6" marker-end="url(#ms)"/>
+  <text x="648" y="378" text-anchor="middle" font-size="10" fill="#8B5CF6">routes to stub-backend</text>
+
+  <!-- ── Step 9  y=410 ── -->
+  <circle cx="22" cy="410" r="9" fill="#555555"/>
+  <text x="22" y="414" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">9</text>
+  <line x1="718" y1="410" x2="584" y2="410" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="648" y="404" text-anchor="middle" font-size="10" fill="#888888">"A simple white test image containing rendered text."</text>
+  <text x="648" y="422" text-anchor="middle" font-size="9" fill="#666666">(detect → {detections:[{label, present:true, confidence:0.9}]};  ask → answer string)</text>
+
+  <!-- ── Step 10  y=444 ── -->
+  <circle cx="22" cy="444" r="9" fill="#555555"/>
+  <text x="22" y="448" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">10</text>
+  <line x1="580" y1="444" x2="328" y2="444" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="454" y="438" text-anchor="middle" font-size="10" fill="#888888">{choices:[{message:{content:"…"}}], usage:{prompt_tokens, completion_tokens}}</text>
+
+  <!-- ── Step 11  y=476 ── -->
+  <circle cx="22" cy="476" r="9" fill="#555555"/>
+  <text x="22" y="480" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">11</text>
+  <line x1="324" y1="476" x2="200" y2="476" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="260" y="470" text-anchor="middle" font-size="10" fill="#888888">{result:{description:"…"}, provenance:{backend_used:"deepseek-v4-flash",…}, gates}</text>
+
+  <!-- ── Step 12  self-loop Gateway y=508 ── -->
+  <circle cx="22" cy="508" r="9" fill="#555555"/>
+  <text x="22" y="512" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">12</text>
+  <path d="M196,508 Q228,508 228,518 Q228,528 196,528" fill="none" stroke="#4A90D9" stroke-width="1.4" marker-end="url(#mc)"/>
+  <text x="240" y="520" text-anchor="start" font-size="10" fill="#4A90D9">job.update(status="succeeded")</text>
+
+  <!-- ── Step 13 y=546 ── -->
+  <circle cx="22" cy="546" r="9" fill="#555555"/>
+  <text x="22" y="550" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">13</text>
+  <line x1="68" y1="546" x2="192" y2="546" stroke="#4A90D9" stroke-width="1.6" marker-end="url(#mc)"/>
+  <text x="132" y="540" text-anchor="middle" font-size="10" fill="#4A90D9">GET /jobs/{job_id}</text>
+
+  <!-- ── Step 14 y=568 ── -->
+  <circle cx="22" cy="568" r="9" fill="#555555"/>
+  <text x="22" y="572" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">14</text>
+  <line x1="196" y1="568" x2="72" y2="568" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="132" y="562" text-anchor="middle" font-size="10" fill="#888888">200 {status:"succeeded", result:{description|detections|answer}, provenance, gates}</text>
+
+  <!-- ── Operation variants note ── -->
+  <rect x="36" y="596" width="764" height="52" rx="6" fill="#f9f9f9" stroke="#dddddd" stroke-width="1"/>
+  <text x="46" y="614" font-size="11" font-weight="600" fill="#333333">Operation variants (same flow, different system prompt + result key)</text>
+  <text x="46" y="630" font-size="10" fill="#555555">describe → system:"Describe the image…"  result.description = string  |  detect → system:"Detect objects…"  result.detections = [{label, present, confidence}]</text>
+  <text x="46" y="645" font-size="10" fill="#555555">ask     → system:"Answer the user's question…"  payload.question required  result.answer = string</text>
+</svg>

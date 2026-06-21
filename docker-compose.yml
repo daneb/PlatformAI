@@ -33,6 +33,21 @@ services:
       retries: 10
       start_period: 10s
 
+  # ── OPA ── policy engine; evaluates policy/egress.rego for egress decisions
+  opa:
+    image: openpolicyagent/opa:latest-debug
+    command: ["run", "--server", "--addr", ":8181", "/policies"]
+    volumes:
+      - ./policy:/policies:ro
+    ports:
+      - "8181:8181"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8181/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
   # ── Stub backend ── mock OpenAI-compatible API; replays fixtures in tests
   stub-backend:
     build: ./stub_backend
@@ -155,6 +170,46 @@ services:
       retries: 5
       start_period: 15s
 
+  # ── Vision spoke ── P3 image understanding via LiteLLM vision (deepseek-v4-flash multimodal)
+  capability-vision:
+    build:
+      context: .
+      dockerfile: capabilities/vision/Dockerfile
+    ports:
+      - "8006:8006"
+    environment:
+      LITELLM_URL: http://litellm:4000
+      GEN_MODEL: deepseek-v4-flash
+      LITELLM_KEY: sk-platform-dev
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: platform
+      MINIO_SECRET_KEY: platform123
+    depends_on:
+      litellm:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8006/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+
+  # ── Anomaly spoke ── P3 fully local anomaly detection (scikit-learn IsolationForest)
+  capability-anomaly:
+    build:
+      context: .
+      dockerfile: capabilities/anomaly/Dockerfile
+    ports:
+      - "8007:8007"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8007/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+
   # ── Gateway ── control plane; all traffic enters here
   gateway:
     build:
@@ -162,6 +217,8 @@ services:
       dockerfile: gateway/Dockerfile
     ports:
       - "8000:8000"
+    environment:
+      OPA_URL: http://opa:8181
     depends_on:
       capability-summarize:
         condition: service_healthy
@@ -170,6 +227,12 @@ services:
       capability-ocr:
         condition: service_healthy
       capability-idp:
+        condition: service_healthy
+      capability-vision:
+        condition: service_healthy
+      capability-anomaly:
+        condition: service_healthy
+      opa:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]

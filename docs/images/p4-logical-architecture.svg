@@ -1,0 +1,131 @@
+<svg viewBox="0 0 820 540" xmlns="http://www.w3.org/2000/svg" role="img" font-family="system-ui,sans-serif" font-size="13">
+  <title>P4 Security Hardening — Service Architecture</title>
+  <desc>Eleven services with P4 additions: OPA policy engine, Egress Gate + Presidio (in-process) + Audit Logger inside Gateway. Capabilities split into Remote (gated) and Local (bypass) groups.</desc>
+
+  <rect width="820" height="540" fill="#ffffff"/>
+  <text x="410" y="26" text-anchor="middle" font-size="15" font-weight="600" fill="#111111">P4 Security Hardening — Service Architecture</text>
+
+  <defs>
+    <marker id="ab" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4A90D9"/></marker>
+    <marker id="ao" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#E65100"/></marker>
+    <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1A6B35"/></marker>
+    <marker id="al" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#E8952A"/></marker>
+    <marker id="ap" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#8B5CF6"/></marker>
+    <marker id="as" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#555555"/></marker>
+  </defs>
+
+  <!-- ── Client ── -->
+  <rect x="14" y="210" width="90" height="58" rx="8" fill="#f5f5f5" stroke="#cccccc" stroke-width="1.5"/>
+  <text x="59" y="233" text-anchor="middle" font-weight="600" fill="#111111">Client</text>
+  <text x="59" y="250" text-anchor="middle" font-size="11" fill="#555555">HTTP / REST</text>
+
+  <!-- ── Gateway (expanded to show P4 internals) ── -->
+  <rect x="148" y="52" width="158" height="338" rx="8" fill="#E8F0FB" stroke="#4A90D9" stroke-width="2"/>
+  <text x="227" y="72" text-anchor="middle" font-size="12" font-weight="700" fill="#1a3a6b">Gateway  :8000</text>
+
+  <!-- sub-box: Egress Gate (NEW) -->
+  <rect x="161" y="82" width="132" height="52" rx="4" fill="#FFF3E0" stroke="#E65100" stroke-width="1.5"/>
+  <text x="227" y="101" text-anchor="middle" font-size="12" font-weight="600" fill="#BF360C">Egress Gate  ★</text>
+  <text x="227" y="117" text-anchor="middle" font-size="10.5" fill="#7a3800">Presidio  (in-process)</text>
+
+  <!-- sub-box: Audit Logger (NEW) -->
+  <rect x="161" y="142" width="132" height="40" rx="4" fill="#E8F5E9" stroke="#2E7D32" stroke-width="1.5"/>
+  <text x="227" y="158" text-anchor="middle" font-size="12" font-weight="600" fill="#1B5E20">Audit Logger  ★</text>
+  <text x="227" y="172" text-anchor="middle" font-size="10" fill="#2E7D32">SHA-256 hash · never raw</text>
+
+  <!-- divider -->
+  <line x1="163" y1="192" x2="289" y2="192" stroke="#4A90D9" stroke-width="0.8" stroke-dasharray="4,3"/>
+
+  <!-- sub-box: Job Store (existing) -->
+  <rect x="161" y="200" width="132" height="38" rx="4" fill="#DCE8F8" stroke="#4A90D9" stroke-width="1"/>
+  <text x="227" y="223" text-anchor="middle" font-size="11.5" fill="#1a3a6b">Job Store</text>
+
+  <!-- gateway route labels -->
+  <text x="227" y="265" text-anchor="middle" font-size="11" fill="#2c5282">POST /capabilities  →  202</text>
+  <text x="227" y="281" text-anchor="middle" font-size="11" fill="#2c5282">GET  /jobs/{id}</text>
+  <text x="227" y="300" text-anchor="middle" font-size="10" fill="#888888">gate runs in asyncio.to_thread</text>
+  <text x="227" y="314" text-anchor="middle" font-size="10" fill="#888888">OPA query first → Presidio if allowed</text>
+  <text x="227" y="333" text-anchor="middle" font-size="10" fill="#888888">local caps bypass gate entirely</text>
+  <text x="227" y="352" text-anchor="middle" font-size="10" fill="#888888">OPA down → fail-closed deny</text>
+  <text x="227" y="376" text-anchor="middle" font-size="10" fill="#888888">112 tests · 11 adversarial integration</text>
+
+  <!-- ── OPA (NEW) ── -->
+  <rect x="362" y="48" width="138" height="86" rx="8" fill="#FFF3E0" stroke="#E65100" stroke-width="2"/>
+  <text x="431" y="70" text-anchor="middle" font-size="13" font-weight="700" fill="#BF360C">OPA  ★  :8181</text>
+  <text x="431" y="86" text-anchor="middle" font-size="11" fill="#7a3800">policy/egress.rego</text>
+  <text x="431" y="101" text-anchor="middle" font-size="10.5" fill="#7a3800">confidential / restricted → deny</text>
+  <text x="431" y="115" text-anchor="middle" font-size="10.5" fill="#7a3800">on_prem_only residency → deny</text>
+  <text x="431" y="126" text-anchor="middle" font-size="10" fill="#888888">12 OPA unit tests (egress_test.rego)</text>
+
+  <!-- ── Remote Capabilities ── -->
+  <rect x="362" y="188" width="138" height="110" rx="8" fill="#EEF2FB" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="431" y="208" text-anchor="middle" font-size="12" font-weight="600" fill="#1a3a6b">Remote Capabilities</text>
+  <text x="431" y="226" text-anchor="middle" font-size="10.5" fill="#555555">summarize  :8001</text>
+  <text x="431" y="241" text-anchor="middle" font-size="10.5" fill="#555555">rag  :8003</text>
+  <text x="431" y="256" text-anchor="middle" font-size="10.5" fill="#555555">idp  :8005</text>
+  <text x="431" y="271" text-anchor="middle" font-size="10.5" fill="#555555">vision  :8006</text>
+  <text x="431" y="289" text-anchor="middle" font-size="10" font-style="italic" fill="#888888">inference via LiteLLM</text>
+
+  <!-- ── Local Capabilities (bypass gate) ── -->
+  <rect x="362" y="318" width="138" height="72" rx="8" fill="#E6F4EA" stroke="#1A6B35" stroke-width="2"/>
+  <text x="431" y="338" text-anchor="middle" font-size="12" font-weight="600" fill="#0a3318">Local Capabilities</text>
+  <text x="431" y="354" text-anchor="middle" font-size="10.5" fill="#1A6B35">ocr  :8004  ·  anomaly  :8007</text>
+  <text x="431" y="369" text-anchor="middle" font-size="10.5" fill="#555555">Tesseract · IsolationForest</text>
+  <text x="431" y="382" text-anchor="middle" font-size="10" font-style="italic" fill="#1A6B35">bypass egress gate — no OPA call</text>
+
+  <!-- ── LiteLLM ── -->
+  <rect x="558" y="188" width="118" height="72" rx="8" fill="#FEF4E4" stroke="#E8952A" stroke-width="1.5"/>
+  <text x="617" y="210" text-anchor="middle" font-weight="600" fill="#7a4400">LiteLLM  :4000</text>
+  <text x="617" y="226" text-anchor="middle" font-size="10.5" fill="#E8952A">deepseek-v4-flash</text>
+  <text x="617" y="241" text-anchor="middle" font-size="10.5" fill="#E8952A">deepseek-v4-pro</text>
+  <text x="617" y="254" text-anchor="middle" font-size="10.5" fill="#E8952A">embed-model</text>
+
+  <!-- ── stub-backend ── -->
+  <rect x="700" y="188" width="110" height="72" rx="8" fill="#F5F0FB" stroke="#8B5CF6" stroke-width="1.5"/>
+  <text x="755" y="210" text-anchor="middle" font-weight="600" fill="#3b1a7a">stub-backend</text>
+  <text x="755" y="226" text-anchor="middle" font-size="11" fill="#8B5CF6">:8002</text>
+  <text x="755" y="241" text-anchor="middle" font-size="10.5" fill="#3b1a7a">record / replay</text>
+  <text x="755" y="254" text-anchor="middle" font-size="10.5" fill="#3b1a7a">no paid calls</text>
+
+  <!-- ── Arrows ── -->
+
+  <!-- Client → Gateway POST -->
+  <line x1="104" y1="235" x2="147" y2="235" stroke="#4A90D9" stroke-width="1.5" marker-end="url(#ab)"/>
+  <text x="126" y="230" text-anchor="middle" font-size="10" fill="#4A90D9">POST</text>
+
+  <!-- Gateway → Client return (dashed) -->
+  <line x1="148" y1="248" x2="104" y2="248" stroke="#4A90D9" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#ab)"/>
+  <text x="126" y="262" text-anchor="middle" font-size="10" fill="#4A90D9">202 / result</text>
+
+  <!-- Egress Gate → OPA policy query -->
+  <path d="M293,108 C330,108 330,91 362,91" stroke="#E65100" stroke-width="1.5" fill="none" marker-end="url(#ao)"/>
+  <text x="330" y="101" text-anchor="middle" font-size="10" fill="#E65100">policy query</text>
+
+  <!-- Gateway → Remote Caps (gated) -->
+  <line x1="306" y1="243" x2="362" y2="243" stroke="#4A90D9" stroke-width="1.5" marker-end="url(#ab)"/>
+  <text x="334" y="237" text-anchor="middle" font-size="10" fill="#4A90D9">gated</text>
+
+  <!-- Gateway → Local Caps (bypass) -->
+  <line x1="306" y1="354" x2="362" y2="354" stroke="#1A6B35" stroke-width="1.5" marker-end="url(#ag)"/>
+  <text x="334" y="348" text-anchor="middle" font-size="10" fill="#1A6B35">bypass</text>
+
+  <!-- Remote Caps → LiteLLM -->
+  <line x1="500" y1="228" x2="558" y2="228" stroke="#E8952A" stroke-width="1.5" marker-end="url(#al)"/>
+  <text x="529" y="222" text-anchor="middle" font-size="10" fill="#E8952A">infer</text>
+
+  <!-- LiteLLM → stub-backend -->
+  <line x1="676" y1="224" x2="700" y2="224" stroke="#8B5CF6" stroke-width="1.5" marker-end="url(#ap)"/>
+
+  <!-- ── Startup chain ── -->
+  <rect x="14" y="408" width="792" height="50" rx="4" fill="#f8f8f8" stroke="#dddddd" stroke-width="1"/>
+  <text x="24" y="425" font-size="11" fill="#555555" font-weight="600">Startup order:</text>
+  <text x="24" y="441" font-size="10.5" fill="#555555">stub-backend  →  litellm  →  postgres  +  minio  +  opa  →  capability-{summarize, rag, ocr, idp, vision, anomaly}  →  gateway</text>
+  <text x="24" y="453" font-size="10" fill="#888888">gateway depends_on: opa healthy + all 6 capabilities healthy</text>
+
+  <!-- ── New-in-P4 banner ── -->
+  <rect x="14" y="468" width="792" height="28" rx="4" fill="#FFF3E0" stroke="#E65100" stroke-width="1"/>
+  <text x="24" y="486" font-size="11" fill="#BF360C">★  New in P4:  Egress Gate (gateway/egress_gate.py)  ·  Presidio PII redaction (in-process)  ·  OPA policy engine  ·  Audit Logger (SHA-256 hash, never raw payload)</text>
+
+  <!-- ── Postgres + MinIO footnote ── -->
+  <text x="14" y="510" font-size="10" fill="#888888">postgres :5432 + minio :9000 support RAG (pgvector) and OCR/IDP/Vision (object store) — unchanged from P1/P2/P3.</text>
+</svg>

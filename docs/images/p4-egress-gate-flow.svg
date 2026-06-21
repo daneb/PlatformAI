@@ -1,0 +1,148 @@
+<svg viewBox="0 0 820 660" xmlns="http://www.w3.org/2000/svg" role="img" font-family="system-ui,sans-serif" font-size="13">
+  <title>P4 Egress Gate — Decision Flow</title>
+  <desc>Flowchart: local capabilities bypass gate; remote capabilities query OPA then Presidio before dispatch; fail-closed on OPA unavailability.</desc>
+
+  <rect width="820" height="660" fill="#ffffff"/>
+  <text x="410" y="24" text-anchor="middle" font-size="15" font-weight="600" fill="#111111">P4 Egress Gate — Decision Flow</text>
+  <text x="410" y="40" text-anchor="middle" font-size="11" fill="#888888">gateway/egress_gate.py · called via asyncio.to_thread from _dispatch</text>
+
+  <defs>
+    <marker id="mb" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4A90D9"/></marker>
+    <marker id="mg" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1A6B35"/></marker>
+    <marker id="mr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#C0392B"/></marker>
+    <marker id="mp" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#7B1FA2"/></marker>
+    <marker id="mo" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#E65100"/></marker>
+  </defs>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       MAIN FLOW  (left column, boxes 60-380, center x=220)
+  ════════════════════════════════════════════════════════════════ -->
+
+  <!-- Step 1: receive + hash -->
+  <rect x="60" y="56" width="320" height="38" rx="6" fill="#E8F0FB" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="220" y="79" text-anchor="middle" font-size="11.5" fill="#1a3a6b">receive (capability, classification, residency, payload)</text>
+  <text x="220" y="92" text-anchor="middle" font-size="10.5" fill="#4A90D9">↓  payload_sha256 = SHA-256(payload)</text>
+  <!-- re-draw taller to fit 2 lines -->
+  <rect x="60" y="56" width="320" height="48" rx="6" fill="#E8F0FB" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="220" y="76" text-anchor="middle" font-size="11.5" fill="#1a3a6b">receive (capability, classification, residency, payload)</text>
+  <text x="220" y="93" text-anchor="middle" font-size="10.5" fill="#4A90D9">payload_sha256 = SHA-256(canonical JSON)</text>
+
+  <!-- async background task boundary -->
+  <rect x="44" y="112" width="352" height="16" rx="3" fill="#f0f0f0" stroke="#bbbbbb" stroke-width="1" stroke-dasharray="5,3"/>
+  <text x="220" y="124" text-anchor="middle" font-size="10" fill="#888888">─ ─ ─  background task  ─ ─ ─</text>
+
+  <!-- Arrow 1→diamond1 -->
+  <line x1="220" y1="128" x2="220" y2="146" stroke="#4A90D9" stroke-width="1.5" marker-end="url(#mb)"/>
+
+  <!-- Diamond 1: local capability? -->
+  <!-- center (220, 178), half-w=120, half-h=34 -->
+  <polygon points="220,144 340,178 220,212 100,178" fill="#FFF3E0" stroke="#E65100" stroke-width="1.8"/>
+  <text x="220" y="173" text-anchor="middle" font-size="11" font-weight="600" fill="#BF360C">capability ∈</text>
+  <text x="220" y="187" text-anchor="middle" font-size="11" font-weight="600" fill="#BF360C">{ocr, anomaly}?</text>
+
+  <!-- NO label + arrow down -->
+  <line x1="220" y1="212" x2="220" y2="233" stroke="#4A90D9" stroke-width="1.5" marker-end="url(#mb)"/>
+  <text x="229" y="226" font-size="10" fill="#4A90D9">NO</text>
+
+  <!-- Step 2: Query OPA -->
+  <rect x="60" y="233" width="320" height="52" rx="6" fill="#FFF3E0" stroke="#E65100" stroke-width="1.5"/>
+  <text x="220" y="253" text-anchor="middle" font-size="11.5" font-weight="600" fill="#BF360C">Query OPA</text>
+  <text x="220" y="268" text-anchor="middle" font-size="10.5" fill="#7a3800">POST /v1/data/platform/egress</text>
+  <text x="220" y="281" text-anchor="middle" font-size="10.5" fill="#7a3800">{capability, classification, residency}  timeout=5s</text>
+
+  <!-- Arrow 2→diamond2 -->
+  <line x1="220" y1="285" x2="220" y2="305" stroke="#E65100" stroke-width="1.5" marker-end="url(#mo)"/>
+
+  <!-- Diamond 2: OPA allow? -->
+  <!-- center (220, 328), half-w=90, half-h=28 -->
+  <polygon points="220,300 310,328 220,356 130,328" fill="#FFF3E0" stroke="#E65100" stroke-width="1.8"/>
+  <text x="220" y="323" text-anchor="middle" font-size="11" font-weight="600" fill="#BF360C">OPA</text>
+  <text x="220" y="337" text-anchor="middle" font-size="11" font-weight="600" fill="#BF360C">allow?</text>
+
+  <!-- YES label + arrow down -->
+  <line x1="220" y1="356" x2="220" y2="375" stroke="#7B1FA2" stroke-width="1.5" marker-end="url(#mp)"/>
+  <text x="229" y="369" font-size="10" fill="#7B1FA2">YES</text>
+
+  <!-- Step 3: Presidio redaction -->
+  <rect x="60" y="375" width="320" height="52" rx="6" fill="#F3E5F5" stroke="#7B1FA2" stroke-width="1.5"/>
+  <text x="220" y="395" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4a007a">Presidio  PII  redaction</text>
+  <text x="220" y="410" text-anchor="middle" font-size="10.5" fill="#7B1FA2">analyze(text, entities=[EMAIL, PHONE, CC, SSN, IP])</text>
+  <text x="220" y="423" text-anchor="middle" font-size="10.5" fill="#7B1FA2">anonymize detected spans → redacted_payload</text>
+
+  <!-- Arrow 3→4 -->
+  <line x1="220" y1="427" x2="220" y2="445" stroke="#4A90D9" stroke-width="1.5" marker-end="url(#mb)"/>
+
+  <!-- Step 4: set egress_decision -->
+  <rect x="60" y="445" width="320" height="38" rx="6" fill="#E8F0FB" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="220" y="462" text-anchor="middle" font-size="10.5" fill="#1a3a6b">egress_decision = "redacted_then_allowed"  if  n &gt; 0</text>
+  <text x="220" y="477" text-anchor="middle" font-size="10.5" fill="#1a3a6b">egress_decision = "allowed"                if  n = 0</text>
+
+  <!-- Arrow 4→5 -->
+  <line x1="220" y1="483" x2="220" y2="499" stroke="#4A90D9" stroke-width="1.5" marker-end="url(#mb)"/>
+
+  <!-- Step 5: dispatch -->
+  <rect x="60" y="499" width="320" height="38" rx="6" fill="#E8F0FB" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="220" y="516" text-anchor="middle" font-size="11.5" fill="#1a3a6b">POST /execute  to capability  with  redacted_payload</text>
+  <text x="220" y="531" text-anchor="middle" font-size="10.5" fill="#888888">capability returns result + provenance</text>
+
+  <!-- Arrow 5→6 -->
+  <line x1="220" y1="537" x2="220" y2="553" stroke="#4A90D9" stroke-width="1.5" marker-end="url(#mb)"/>
+
+  <!-- Step 6: mark succeeded -->
+  <rect x="60" y="553" width="320" height="36" rx="6" fill="#E8F0FB" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="220" y="570" text-anchor="middle" font-size="11.5" fill="#1a3a6b">mark job "succeeded"  ·  build GateDecision</text>
+  <text x="220" y="583" text-anchor="middle" font-size="10.5" fill="#888888">(classification, egress_decision, redactions_applied)</text>
+
+  <!-- Arrow 6→7 -->
+  <line x1="220" y1="589" x2="220" y2="605" stroke="#1A6B35" stroke-width="1.5" marker-end="url(#mg)"/>
+
+  <!-- Step 7: audit log (shared terminal) -->
+  <rect x="60" y="605" width="320" height="44" rx="6" fill="#E8F5E9" stroke="#2E7D32" stroke-width="1.5"/>
+  <text x="220" y="623" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1B5E20">emit audit log</text>
+  <text x="220" y="638" text-anchor="middle" font-size="10.5" fill="#2E7D32">{sha256, egress_decision, redactions_applied, cost_usd}</text>
+  <text x="220" y="649" text-anchor="middle" font-size="10" fill="#888888">gateway/audit_log.py  —  never logs raw payload</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       RIGHT BRANCH — Local bypass  (exits Diamond 1 YES)
+  ════════════════════════════════════════════════════════════════ -->
+
+  <!-- YES arrow from Diamond 1 right tip (340,178) → right -->
+  <line x1="340" y1="178" x2="420" y2="178" stroke="#1A6B35" stroke-width="1.5"/>
+  <line x1="420" y1="178" x2="420" y2="200" stroke="#1A6B35" stroke-width="1.5"/>
+  <line x1="420" y1="200" x2="455" y2="200" stroke="#1A6B35" stroke-width="1.5" marker-end="url(#mg)"/>
+  <text x="390" y="172" text-anchor="middle" font-size="10" fill="#1A6B35">YES</text>
+
+  <!-- Local bypass box -->
+  <rect x="455" y="176" width="295" height="50" rx="6" fill="#E6F4EA" stroke="#1A6B35" stroke-width="1.5"/>
+  <text x="602" y="196" text-anchor="middle" font-size="11.5" font-weight="600" fill="#0a3318">bypass gate  ·  decision = "local"</text>
+  <text x="602" y="211" text-anchor="middle" font-size="10.5" fill="#1A6B35">POST /execute directly (no OPA, no Presidio)</text>
+  <text x="602" y="224" text-anchor="middle" font-size="10" fill="#555555">cost_usd = 0.0  (local inference only)</text>
+
+  <!-- Arrow to shared audit log (from local bypass) -->
+  <line x1="602" y1="226" x2="602" y2="617" stroke="#1A6B35" stroke-width="1" stroke-dasharray="5,3"/>
+  <line x1="602" y1="617" x2="382" y2="627" stroke="#1A6B35" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#mg)"/>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       RIGHT BRANCH — Deny  (exits Diamond 2 NO)
+  ════════════════════════════════════════════════════════════════ -->
+
+  <!-- NO arrow from Diamond 2 right tip (310,328) → right -->
+  <line x1="310" y1="328" x2="420" y2="328" stroke="#C0392B" stroke-width="1.5"/>
+  <line x1="420" y1="328" x2="455" y2="328" stroke="#C0392B" stroke-width="1.5" marker-end="url(#mr)"/>
+  <text x="380" y="322" text-anchor="middle" font-size="10" fill="#C0392B">NO</text>
+
+  <!-- Deny box -->
+  <rect x="455" y="304" width="295" height="50" rx="6" fill="#FBEAEA" stroke="#C0392B" stroke-width="1.5"/>
+  <text x="602" y="323" text-anchor="middle" font-size="11.5" font-weight="600" fill="#7a1f1f">mark job "denied"</text>
+  <text x="602" y="338" text-anchor="middle" font-size="10.5" fill="#C0392B">error = deny_reason  (classification / residency)</text>
+  <text x="602" y="351" text-anchor="middle" font-size="10" fill="#888888">OPA down → error = "opa_unavailable:..."</text>
+
+  <!-- Arrow from deny to deny-audit -->
+  <line x1="602" y1="354" x2="602" y2="372" stroke="#C0392B" stroke-width="1.5" marker-end="url(#mr)"/>
+
+  <!-- Deny audit box -->
+  <rect x="455" y="372" width="295" height="40" rx="6" fill="#FBEAEA" stroke="#C0392B" stroke-width="1.5"/>
+  <text x="602" y="390" text-anchor="middle" font-size="11.5" font-weight="600" fill="#7a1f1f">emit audit log  (deny path)</text>
+  <text x="602" y="405" text-anchor="middle" font-size="10.5" fill="#C0392B">{sha256, "denied", deny_reason}  —  no payload egress</text>
+
+</svg>

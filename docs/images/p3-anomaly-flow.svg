@@ -1,0 +1,141 @@
+<svg viewBox="0 0 820 580" xmlns="http://www.w3.org/2000/svg" role="img" font-family="system-ui,sans-serif" font-size="12">
+  <title>P3 Anomaly Detection Flow — fit → score</title>
+  <desc>14-step sequence: client submits fit job → Anomaly trains IsolationForest in-memory → client submits score job → Anomaly scores records and flags outliers → both jobs return provenance with zero egress.</desc>
+
+  <rect width="820" height="580" fill="#ffffff"/>
+  <text x="410" y="24" text-anchor="middle" font-size="15" font-weight="600" fill="#111111">P3 Anomaly Detection Flow — fit → score</text>
+  <text x="410" y="41" text-anchor="middle" font-size="11" fill="#666666">POST /capabilities {operation:"fit"} then {operation:"score"} — fully local, zero egress, no LiteLLM call</text>
+
+  <defs>
+    <marker id="mc" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#4A90D9"/></marker>
+    <marker id="ma" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#1A6B35"/></marker>
+    <marker id="mg" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#888888"/></marker>
+  </defs>
+
+  <!-- ── Participant boxes  y=52..88 ── -->
+  <!-- 3 participants -->
+
+  <!-- Client cx=140 -->
+  <rect x="56"  y="52" width="168" height="36" rx="6" fill="#f5f5f5" stroke="#cccccc" stroke-width="1.4"/>
+  <text x="140" y="70" text-anchor="middle" font-weight="600" fill="#333333">Client</text>
+  <text x="140" y="84" text-anchor="middle" font-size="10" fill="#777777">curl / pytest</text>
+
+  <!-- Gateway cx=410 -->
+  <rect x="313" y="52" width="194" height="36" rx="6" fill="#E8F0FB" stroke="#4A90D9" stroke-width="1.4"/>
+  <text x="410" y="70" text-anchor="middle" font-weight="600" fill="#1a3a6b">Gateway</text>
+  <text x="410" y="84" text-anchor="middle" font-size="10" fill="#4A90D9">:8000  (job store + async dispatch)</text>
+
+  <!-- Anomaly cx=690 -->
+  <rect x="596" y="52" width="168" height="36" rx="6" fill="#E6F4EA" stroke="#1A6B35" stroke-width="1.4"/>
+  <text x="680" y="70" text-anchor="middle" font-weight="600" fill="#0a3318">Anomaly</text>
+  <text x="680" y="84" text-anchor="middle" font-size="10" fill="#1A6B35">:8007  (local · no egress)</text>
+
+  <!-- ── Lifelines ── -->
+  <line x1="140" y1="88" x2="140" y2="562" stroke="#cccccc" stroke-width="1" stroke-dasharray="5 3"/>
+  <line x1="410" y1="88" x2="410" y2="562" stroke="#4A90D9" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="680" y1="88" x2="680" y2="562" stroke="#1A6B35" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+
+  <!-- ══ FIT PHASE ══ -->
+  <rect x="36" y="100" width="748" height="16" rx="3" fill="#E6F4EA" stroke="#1A6B35" stroke-width="1" opacity=".7"/>
+  <text x="410" y="112" text-anchor="middle" font-size="10" font-weight="600" fill="#0a3318">── FIT phase ──</text>
+
+  <!-- ── Step 1  y=132 ── -->
+  <circle cx="22" cy="132" r="9" fill="#555555"/>
+  <text x="22" y="136" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">1</text>
+  <line x1="140" y1="132" x2="406" y2="132" stroke="#4A90D9" stroke-width="1.6" marker-end="url(#mc)"/>
+  <text x="275" y="126" text-anchor="middle" font-size="10" fill="#4A90D9">POST /capabilities {operation:"fit"}</text>
+  <text x="275" y="146" text-anchor="middle" font-size="9" fill="#666666">payload:{dataset:[{x:1.0,y:2.0},…], model_id:"prod-v1"}</text>
+
+  <!-- ── Step 2  y=164 ── -->
+  <circle cx="22" cy="164" r="9" fill="#555555"/>
+  <text x="22" y="168" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">2</text>
+  <line x1="410" y1="164" x2="144" y2="164" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="275" y="158" text-anchor="middle" font-size="10" fill="#888888">202 Accepted + job_id</text>
+
+  <!-- async boundary -->
+  <rect x="36" y="174" width="748" height="18" rx="4" fill="#FFFBEA" stroke="#D4AF37" stroke-width="1" stroke-dasharray="6 3"/>
+  <text x="410" y="187" text-anchor="middle" font-size="10" fill="#7a6000" font-weight="500">— background task ——</text>
+
+  <!-- ── Step 3  y=208 ── -->
+  <circle cx="22" cy="208" r="9" fill="#555555"/>
+  <text x="22" y="212" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">3</text>
+  <line x1="410" y1="208" x2="676" y2="208" stroke="#1A6B35" stroke-width="1.6" marker-end="url(#ma)"/>
+  <text x="543" y="202" text-anchor="middle" font-size="10" fill="#1A6B35">POST /execute {operation:"fit"}</text>
+
+  <!-- ── Step 4  self-loop Anomaly y=236 ── -->
+  <circle cx="22" cy="236" r="9" fill="#555555"/>
+  <text x="22" y="240" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">4</text>
+  <path d="M680,236 Q718,236 718,250 Q718,264 680,264" fill="none" stroke="#1A6B35" stroke-width="1.4" marker-end="url(#ma)"/>
+  <text x="730" y="244" text-anchor="start" font-size="10" fill="#1A6B35">IsolationForest(n_estimators=100).fit(X)</text>
+  <text x="730" y="258" text-anchor="start" font-size="9" fill="#666666">store (clf, features, train_score_min, train_score_max) in _models[model_id]</text>
+
+  <!-- ── Step 5  y=280 ── -->
+  <circle cx="22" cy="280" r="9" fill="#555555"/>
+  <text x="22" y="284" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">5</text>
+  <line x1="680" y1="280" x2="414" y2="280" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="543" y="274" text-anchor="middle" font-size="10" fill="#888888">{result:{model_id, samples_trained, features}, provenance:{backend_used:"sklearn-isolation-forest",cost_usd:0}, gates}</text>
+
+  <!-- ── Step 6  self-loop Gateway y=298 ── -->
+  <circle cx="22" cy="298" r="9" fill="#555555"/>
+  <text x="22" y="302" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">6</text>
+  <path d="M410,298 Q440,298 440,308 Q440,318 410,318" fill="none" stroke="#4A90D9" stroke-width="1.4" marker-end="url(#mc)"/>
+  <text x="452" y="310" text-anchor="start" font-size="10" fill="#4A90D9">job.update(status="succeeded")</text>
+
+  <!-- ── Step 7  y=332 ── -->
+  <circle cx="22" cy="332" r="9" fill="#555555"/>
+  <text x="22" y="336" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">7</text>
+  <line x1="140" y1="332" x2="406" y2="332" stroke="#4A90D9" stroke-width="1.6" marker-end="url(#mc)"/>
+  <text x="275" y="326" text-anchor="middle" font-size="10" fill="#4A90D9">GET /jobs/{fit_job_id} → 200 {status:"succeeded"}</text>
+
+  <!-- ══ SCORE PHASE ══ -->
+  <rect x="36" y="352" width="748" height="16" rx="3" fill="#E6F4EA" stroke="#1A6B35" stroke-width="1" opacity=".7"/>
+  <text x="410" y="364" text-anchor="middle" font-size="10" font-weight="600" fill="#0a3318">── SCORE phase ──</text>
+
+  <!-- ── Step 8  y=382 ── -->
+  <circle cx="22" cy="382" r="9" fill="#555555"/>
+  <text x="22" y="386" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">8</text>
+  <line x1="140" y1="382" x2="406" y2="382" stroke="#4A90D9" stroke-width="1.6" marker-end="url(#mc)"/>
+  <text x="275" y="376" text-anchor="middle" font-size="10" fill="#4A90D9">POST /capabilities {operation:"score"}</text>
+  <text x="275" y="396" text-anchor="middle" font-size="9" fill="#666666">payload:{records:[{x:1.1,y:2.0},{x:999,y:999}], model_id:"prod-v1"}</text>
+
+  <!-- ── Step 9  y=414 ── -->
+  <circle cx="22" cy="414" r="9" fill="#555555"/>
+  <text x="22" y="418" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">9</text>
+  <line x1="410" y1="414" x2="144" y2="414" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="275" y="408" text-anchor="middle" font-size="10" fill="#888888">202 Accepted + job_id</text>
+
+  <!-- async boundary -->
+  <rect x="36" y="424" width="748" height="18" rx="4" fill="#FFFBEA" stroke="#D4AF37" stroke-width="1" stroke-dasharray="6 3"/>
+  <text x="410" y="437" text-anchor="middle" font-size="10" fill="#7a6000" font-weight="500">— background task ——</text>
+
+  <!-- ── Step 10  y=454 ── -->
+  <circle cx="22" cy="454" r="9" fill="#555555"/>
+  <text x="22" y="458" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">10</text>
+  <line x1="410" y1="454" x2="676" y2="454" stroke="#1A6B35" stroke-width="1.6" marker-end="url(#ma)"/>
+  <text x="543" y="448" text-anchor="middle" font-size="10" fill="#1A6B35">POST /execute {operation:"score"}</text>
+
+  <!-- ── Step 11  self-loop Anomaly y=480 ── -->
+  <circle cx="22" cy="480" r="9" fill="#555555"/>
+  <text x="22" y="484" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">11</text>
+  <path d="M680,480 Q718,480 718,492 Q718,504 680,504" fill="none" stroke="#1A6B35" stroke-width="1.4" marker-end="url(#ma)"/>
+  <text x="730" y="488" text-anchor="start" font-size="10" fill="#1A6B35">clf.score_samples(X) + normalize via train bounds</text>
+  <text x="730" y="502" text-anchor="start" font-size="9" fill="#666666">anomaly_score = 1 − (s−s_min)/(s_max−s_min);  is_anomaly = clf.predict == −1</text>
+
+  <!-- ── Step 12  y=522 ── -->
+  <circle cx="22" cy="522" r="9" fill="#555555"/>
+  <text x="22" y="526" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">12</text>
+  <line x1="680" y1="522" x2="414" y2="522" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="543" y="516" text-anchor="middle" font-size="10" fill="#888888">{result:{scored_records:[{…,anomaly_score:0.24,is_anomaly:false},{…,anomaly_score:1.00,is_anomaly:true}]}}</text>
+
+  <!-- ── Step 13  self-loop Gateway y=540 ── -->
+  <circle cx="22" cy="540" r="9" fill="#555555"/>
+  <text x="22" y="544" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">13</text>
+  <path d="M410,540 Q440,540 440,550 Q440,560 410,560" fill="none" stroke="#4A90D9" stroke-width="1.4" marker-end="url(#mc)"/>
+  <text x="452" y="552" text-anchor="start" font-size="10" fill="#4A90D9">job.update(status="succeeded")</text>
+
+  <!-- ── Step 14  y=562 ── -->
+  <circle cx="22" cy="562" r="9" fill="#555555"/>
+  <text x="22" y="566" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">14</text>
+  <line x1="140" y1="562" x2="406" y2="562" stroke="#4A90D9" stroke-width="1.6" marker-end="url(#mc)"/>
+  <text x="275" y="556" text-anchor="middle" font-size="10" fill="#4A90D9">GET /jobs/{score_job_id} → 200 {status:"succeeded", result:{scored_records}}</text>
+</svg>

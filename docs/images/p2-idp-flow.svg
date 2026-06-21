@@ -1,0 +1,199 @@
+<svg viewBox="0 0 820 770" xmlns="http://www.w3.org/2000/svg" role="img" font-family="system-ui,sans-serif" font-size="12">
+  <title>P2 IDP Pipeline Flow</title>
+  <desc>19-step sequence: client submits process job → 202 → IDP calls OCR directly (GetObject from MinIO, Tesseract OCR) → LiteLLM classify → LiteLLM extract_fields → local validate → job succeeds → client polls result.</desc>
+
+  <rect width="820" height="770" fill="#ffffff"/>
+  <text x="410" y="24" text-anchor="middle" font-size="15" font-weight="600" fill="#111111">P2 IDP Pipeline Flow</text>
+  <text x="410" y="41" text-anchor="middle" font-size="11" fill="#666666">POST /capabilities {operation:"process", payload:{object_ref, schema, ruleset}} → OCR → classify → extract → validate</text>
+
+  <defs>
+    <marker id="mc" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#4A90D9"/></marker>
+    <marker id="mi" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#16A085"/></marker>
+    <marker id="mo" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#C0392B"/></marker>
+    <marker id="mm" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#B8860B"/></marker>
+    <marker id="ml" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#E8952A"/></marker>
+    <marker id="ms" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#8B5CF6"/></marker>
+    <marker id="mg" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#888888"/></marker>
+  </defs>
+
+  <!-- ── Participant boxes  y=52..88 ── -->
+  <!-- Client cx=58 -->
+  <rect x="10"  y="52" width="96" height="36" rx="6" fill="#f5f5f5" stroke="#cccccc" stroke-width="1.4"/>
+  <text x="58"  y="70" text-anchor="middle" font-weight="600" fill="#333333">Client</text>
+  <text x="58"  y="84" text-anchor="middle" font-size="10" fill="#777777">curl / pytest</text>
+
+  <!-- Gateway cx=175 -->
+  <rect x="126" y="52" width="98" height="36" rx="6" fill="#E8F0FB" stroke="#4A90D9" stroke-width="1.4"/>
+  <text x="175" y="70" text-anchor="middle" font-weight="600" fill="#1a3a6b">Gateway</text>
+  <text x="175" y="84" text-anchor="middle" font-size="10" fill="#4A90D9">:8000</text>
+
+  <!-- IDP cx=292 -->
+  <rect x="243" y="52" width="98" height="36" rx="6" fill="#E8F8F5" stroke="#16A085" stroke-width="1.4"/>
+  <text x="292" y="70" text-anchor="middle" font-weight="600" fill="#0b4f43">IDP</text>
+  <text x="292" y="84" text-anchor="middle" font-size="10" fill="#16A085">:8005</text>
+
+  <!-- OCR cx=409 -->
+  <rect x="360" y="52" width="98" height="36" rx="6" fill="#FBEAEA" stroke="#C0392B" stroke-width="1.4"/>
+  <text x="409" y="70" text-anchor="middle" font-weight="600" fill="#7a1f1f">OCR</text>
+  <text x="409" y="84" text-anchor="middle" font-size="10" fill="#C0392B">:8004</text>
+
+  <!-- MinIO cx=526 -->
+  <rect x="477" y="52" width="98" height="36" rx="6" fill="#FBF3DE" stroke="#B8860B" stroke-width="1.4"/>
+  <text x="526" y="70" text-anchor="middle" font-weight="600" fill="#6b4f00">MinIO</text>
+  <text x="526" y="84" text-anchor="middle" font-size="10" fill="#B8860B">:9000</text>
+
+  <!-- LiteLLM cx=643 -->
+  <rect x="594" y="52" width="98" height="36" rx="6" fill="#FEF4E4" stroke="#E8952A" stroke-width="1.4"/>
+  <text x="643" y="70" text-anchor="middle" font-weight="600" fill="#7a4400">LiteLLM</text>
+  <text x="643" y="84" text-anchor="middle" font-size="10" fill="#E8952A">:4000</text>
+
+  <!-- stub-backend cx=760 -->
+  <rect x="711" y="52" width="98" height="36" rx="6" fill="#F5F0FB" stroke="#8B5CF6" stroke-width="1.4"/>
+  <text x="760" y="70" text-anchor="middle" font-weight="600" fill="#3b1a7a">stub-backend</text>
+  <text x="760" y="84" text-anchor="middle" font-size="10" fill="#8B5CF6">:8002</text>
+
+  <!-- ── Lifelines ── -->
+  <line x1="58"  y1="88" x2="58"  y2="752" stroke="#cccccc" stroke-width="1" stroke-dasharray="5 3"/>
+  <line x1="175" y1="88" x2="175" y2="752" stroke="#4A90D9" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="292" y1="88" x2="292" y2="752" stroke="#16A085" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="409" y1="88" x2="409" y2="752" stroke="#C0392B" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="526" y1="88" x2="526" y2="752" stroke="#B8860B" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="643" y1="88" x2="643" y2="752" stroke="#E8952A" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <line x1="760" y1="88" x2="760" y2="752" stroke="#8B5CF6" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+
+  <!-- ── Step 1  y=128 ── -->
+  <circle cx="22" cy="128" r="9" fill="#555555"/>
+  <text x="22" y="132" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">1</text>
+  <line x1="58" y1="128" x2="171" y2="128" stroke="#4A90D9" stroke-width="1.6" marker-end="url(#mc)"/>
+  <text x="117" y="122" text-anchor="middle" font-size="10" fill="#4A90D9">POST /capabilities</text>
+  <text x="117" y="141" text-anchor="middle" font-size="9" fill="#666666">{capability:"idp", operation:"process", payload:{object_ref, schema, ruleset}}</text>
+
+  <!-- ── Step 2  y=160 ── -->
+  <circle cx="22" cy="160" r="9" fill="#555555"/>
+  <text x="22" y="164" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">2</text>
+  <line x1="175" y1="160" x2="62" y2="160" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="117" y="154" text-anchor="middle" font-size="10" fill="#888888">202 Accepted + job_id</text>
+
+  <!-- ── Async boundary ── -->
+  <rect x="36" y="172" width="764" height="20" rx="4" fill="#FFFBEA" stroke="#D4AF37" stroke-width="1" stroke-dasharray="6 3"/>
+  <text x="410" y="186" text-anchor="middle" font-size="10" fill="#7a6000" font-weight="500">— background task (asyncio.create_task) ——</text>
+
+  <!-- ── Step 3  y=208 ── -->
+  <circle cx="22" cy="208" r="9" fill="#555555"/>
+  <text x="22" y="212" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">3</text>
+  <line x1="175" y1="208" x2="288" y2="208" stroke="#16A085" stroke-width="1.6" marker-end="url(#mi)"/>
+  <text x="234" y="202" text-anchor="middle" font-size="10" fill="#16A085">POST /execute {operation:"process"}</text>
+
+  <!-- ── Step 4  y=236 ── -->
+  <circle cx="22" cy="236" r="9" fill="#555555"/>
+  <text x="22" y="240" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">4</text>
+  <line x1="292" y1="236" x2="405" y2="236" stroke="#C0392B" stroke-width="1.6" marker-end="url(#mo)"/>
+  <text x="350" y="230" text-anchor="middle" font-size="10" fill="#C0392B">POST /execute {operation:"extract_layout"}</text>
+  <text x="350" y="249" text-anchor="middle" font-size="9" fill="#666666">direct HTTP call — no gateway job created</text>
+
+  <!-- ── Step 5  y=268 ── -->
+  <circle cx="22" cy="268" r="9" fill="#555555"/>
+  <text x="22" y="272" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">5</text>
+  <line x1="409" y1="268" x2="522" y2="268" stroke="#B8860B" stroke-width="1.6" marker-end="url(#mm)"/>
+  <text x="466" y="262" text-anchor="middle" font-size="10" fill="#B8860B">GetObject s3://documents/key.png</text>
+
+  <!-- ── Step 6  y=296 ── -->
+  <circle cx="22" cy="296" r="9" fill="#555555"/>
+  <text x="22" y="300" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">6</text>
+  <line x1="526" y1="296" x2="413" y2="296" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="466" y="290" text-anchor="middle" font-size="10" fill="#888888">image bytes</text>
+
+  <!-- ── Step 7  y=328 self-loop OCR ── -->
+  <circle cx="22" cy="328" r="9" fill="#555555"/>
+  <text x="22" y="332" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">7</text>
+  <path d="M409,328 Q444,328 444,340 Q444,352 409,352" fill="none" stroke="#C0392B" stroke-width="1.4" marker-end="url(#mo)"/>
+  <text x="482" y="336" text-anchor="start" font-size="10" fill="#C0392B">pytesseract.image_to_data()</text>
+  <text x="482" y="350" text-anchor="start" font-size="9" fill="#666666">group by (block_num, par_num, line_num) → full_text with ↵</text>
+
+  <!-- ── Step 8  y=376 ── -->
+  <circle cx="22" cy="376" r="9" fill="#555555"/>
+  <text x="22" y="380" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">8</text>
+  <line x1="409" y1="376" x2="296" y2="376" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="350" y="370" text-anchor="middle" font-size="10" fill="#888888">{text, words, provenance: backend_used:"tesseract-ocr"}</text>
+
+  <!-- ── Step 9  y=408 ── -->
+  <circle cx="22" cy="408" r="9" fill="#555555"/>
+  <text x="22" y="412" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">9</text>
+  <line x1="292" y1="408" x2="639" y2="408" stroke="#E8952A" stroke-width="1.6" marker-end="url(#ml)"/>
+  <text x="468" y="402" text-anchor="middle" font-size="10" fill="#E8952A">POST /v1/chat/completions  (classify)</text>
+  <text x="468" y="421" text-anchor="middle" font-size="9" fill="#666666">system: "Classify this document into exactly one of: invoice, receipt, contract, other…"</text>
+
+  <!-- ── Step 10  y=448 ── -->
+  <circle cx="22" cy="448" r="9" fill="#555555"/>
+  <text x="22" y="452" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">10</text>
+  <line x1="643" y1="448" x2="756" y2="448" stroke="#8B5CF6" stroke-width="1.6" marker-end="url(#ms)"/>
+  <text x="700" y="442" text-anchor="middle" font-size="10" fill="#8B5CF6">routes to stub</text>
+
+  <!-- ── Step 11  y=470 ── -->
+  <circle cx="22" cy="470" r="9" fill="#555555"/>
+  <text x="22" y="474" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">11</text>
+  <line x1="760" y1="470" x2="647" y2="470" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="700" y="464" text-anchor="middle" font-size="10" fill="#888888">{"doc_type":"invoice"}</text>
+
+  <!-- ── Step 12  y=492 ── -->
+  <circle cx="22" cy="492" r="9" fill="#555555"/>
+  <text x="22" y="496" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">12</text>
+  <line x1="643" y1="492" x2="296" y2="492" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="468" y="486" text-anchor="middle" font-size="10" fill="#888888">{doc_type: "invoice"}</text>
+
+  <!-- ── Step 13  y=520 ── -->
+  <circle cx="22" cy="520" r="9" fill="#555555"/>
+  <text x="22" y="524" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">13</text>
+  <line x1="292" y1="520" x2="639" y2="520" stroke="#E8952A" stroke-width="1.6" marker-end="url(#ml)"/>
+  <text x="468" y="514" text-anchor="middle" font-size="10" fill="#E8952A">POST /v1/chat/completions  (extract_fields)</text>
+  <text x="468" y="533" text-anchor="middle" font-size="9" fill="#666666">system: "Extract the following fields as JSON: Vendor, Amount, Date…"</text>
+
+  <!-- ── Step 14  y=558 ── -->
+  <circle cx="22" cy="558" r="9" fill="#555555"/>
+  <text x="22" y="562" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">14</text>
+  <line x1="643" y1="558" x2="756" y2="558" stroke="#8B5CF6" stroke-width="1.6" marker-end="url(#ms)"/>
+  <text x="700" y="552" text-anchor="middle" font-size="10" fill="#8B5CF6">routes to stub</text>
+
+  <!-- ── Step 15  y=578 ── -->
+  <circle cx="22" cy="578" r="9" fill="#555555"/>
+  <text x="22" y="582" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">15</text>
+  <line x1="760" y1="578" x2="647" y2="578" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="700" y="572" text-anchor="middle" font-size="10" fill="#888888">{"Vendor":"Acme Corp","Amount":"1234.56"}</text>
+
+  <!-- ── Step 16  y=600 ── -->
+  <circle cx="22" cy="600" r="9" fill="#555555"/>
+  <text x="22" y="604" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">16</text>
+  <line x1="643" y1="600" x2="296" y2="600" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="468" y="594" text-anchor="middle" font-size="10" fill="#888888">{fields: {Vendor, Amount, Date}}</text>
+
+  <!-- ── Step 17  y=630 self-loop IDP ── -->
+  <circle cx="22" cy="630" r="9" fill="#555555"/>
+  <text x="22" y="634" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">17</text>
+  <path d="M292,630 Q325,630 325,642 Q325,654 292,654" fill="none" stroke="#16A085" stroke-width="1.4" marker-end="url(#mi)"/>
+  <text x="350" y="638" text-anchor="start" font-size="10" fill="#16A085">validate(fields, ruleset)</text>
+  <text x="350" y="652" text-anchor="start" font-size="9" fill="#666666">local rule engine: required / numeric / regex → {valid, errors}</text>
+
+  <!-- ── Step 18  y=678 ── -->
+  <circle cx="22" cy="678" r="9" fill="#555555"/>
+  <text x="22" y="682" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">18</text>
+  <line x1="292" y1="678" x2="179" y2="678" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="234" y="672" text-anchor="middle" font-size="10" fill="#888888">{result:{doc_type, fields, validation}, provenance, gates}</text>
+
+  <!-- ── Step 19  y=700 self-loop Gateway ── -->
+  <circle cx="22" cy="700" r="9" fill="#555555"/>
+  <text x="22" y="704" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">19</text>
+  <path d="M175,700 Q206,700 206,710 Q206,720 175,720" fill="none" stroke="#4A90D9" stroke-width="1.4" marker-end="url(#mc)"/>
+  <text x="218" y="712" text-anchor="start" font-size="10" fill="#4A90D9">job.update(status="succeeded")</text>
+
+  <!-- ── Step 20  y=734 ── -->
+  <circle cx="22" cy="734" r="9" fill="#555555"/>
+  <text x="22" y="738" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">20</text>
+  <line x1="58" y1="734" x2="171" y2="734" stroke="#4A90D9" stroke-width="1.6" marker-end="url(#mc)"/>
+  <text x="117" y="728" text-anchor="middle" font-size="10" fill="#4A90D9">GET /jobs/{job_id}</text>
+
+  <!-- ── Step 21 / response ── -->
+  <circle cx="22" cy="752" r="9" fill="#555555"/>
+  <text x="22" y="756" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">21</text>
+  <line x1="175" y1="752" x2="62" y2="752" stroke="#888888" stroke-width="1.4" stroke-dasharray="5 2" marker-end="url(#mg)"/>
+  <text x="117" y="746" text-anchor="middle" font-size="10" fill="#888888">200 {status:"succeeded", result:{doc_type, fields, validation}}</text>
+</svg>
